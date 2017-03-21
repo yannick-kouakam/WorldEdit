@@ -41,6 +41,8 @@ import com.sk89q.worldedit.util.command.binding.Text;
 import com.sk89q.worldedit.util.command.parametric.Optional;
 import com.sk89q.worldedit.world.biome.BaseBiome;
 
+import java.util.HashMap;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.sk89q.minecraft.util.commands.Logging.LogMode.*;
 
@@ -50,6 +52,10 @@ import static com.sk89q.minecraft.util.commands.Logging.LogMode.*;
 public class GenerationCommands {
 
     private final WorldEdit worldEdit;
+
+    public Vector coords = null;
+    public HashMap<Integer, Vector> history = new HashMap<>();
+    int houses = 0;
 
     /**
      * Create a new instance.
@@ -62,16 +68,16 @@ public class GenerationCommands {
     }
 
     @Command(
-        aliases = { "/hcyl" },
-        usage = "<pattern> <radius>[,<radius>] [height]",
-        desc = "Generates a hollow cylinder.",
-        help =
-            "Generates a hollow cylinder.\n" +
-            "By specifying 2 radii, separated by a comma,\n" +
-            "you can generate elliptical cylinders.\n" +
-            "The 1st radius is north/south, the 2nd radius is east/west.",
-        min = 2,
-        max = 3
+            aliases = {"/hcyl"},
+            usage = "<pattern> <radius>[,<radius>] [height]",
+            desc = "Generates a hollow cylinder.",
+            help =
+                    "Generates a hollow cylinder.\n" +
+                            "By specifying 2 radii, separated by a comma,\n" +
+                            "you can generate elliptical cylinders.\n" +
+                            "The 1st radius is north/south, the 2nd radius is east/west.",
+            min = 2,
+            max = 3
     )
     @CommandPermissions("worldedit.generation.cylinder")
     @Logging(PLACEMENT)
@@ -80,17 +86,17 @@ public class GenerationCommands {
     }
 
     @Command(
-        aliases = { "/cyl" },
-        usage = "<block> <radius>[,<radius>] [height]",
-        flags = "h",
-        desc = "Generates a cylinder.",
-        help =
-            "Generates a cylinder.\n" +
-            "By specifying 2 radii, separated by a comma,\n" +
-            "you can generate elliptical cylinders.\n" +
-            "The 1st radius is north/south, the 2nd radius is east/west.",
-        min = 2,
-        max = 3
+            aliases = {"/cyl"},
+            usage = "<block> <radius>[,<radius>] [height]",
+            flags = "h",
+            desc = "Generates a cylinder.",
+            help =
+                    "Generates a cylinder.\n" +
+                            "By specifying 2 radii, separated by a comma,\n" +
+                            "you can generate elliptical cylinders.\n" +
+                            "The 1st radius is north/south, the 2nd radius is east/west.",
+            min = 2,
+            max = 3
     )
     @CommandPermissions("worldedit.generation.cylinder")
     @Logging(PLACEMENT)
@@ -98,18 +104,18 @@ public class GenerationCommands {
         String[] radii = radiusString.split(",");
         final double radiusX, radiusZ;
         switch (radii.length) {
-        case 1:
-            radiusX = radiusZ = Math.max(1, Double.parseDouble(radii[0]));
-            break;
+            case 1:
+                radiusX = radiusZ = Math.max(1, Double.parseDouble(radii[0]));
+                break;
 
-        case 2:
-            radiusX = Math.max(1, Double.parseDouble(radii[0]));
-            radiusZ = Math.max(1, Double.parseDouble(radii[1]));
-            break;
+            case 2:
+                radiusX = Math.max(1, Double.parseDouble(radii[0]));
+                radiusZ = Math.max(1, Double.parseDouble(radii[1]));
+                break;
 
-        default:
-            player.printError("You must either specify 1 or 2 radius values.");
-            return;
+            default:
+                player.printError("You must either specify 1 or 2 radius values.");
+                return;
         }
 
         worldEdit.checkMaxRadius(radiusX);
@@ -122,16 +128,16 @@ public class GenerationCommands {
     }
 
     @Command(
-        aliases = { "/hsphere" },
-        usage = "<block> <radius>[,<radius>,<radius>] [raised?]",
-        desc = "Generates a hollow sphere.",
-        help =
-            "Generates a hollow sphere.\n" +
-            "By specifying 3 radii, separated by commas,\n" +
-            "you can generate an ellipsoid. The order of the ellipsoid radii\n" +
-            "is north/south, up/down, east/west.",
-        min = 2,
-        max = 3
+            aliases = {"/hsphere"},
+            usage = "<block> <radius>[,<radius>,<radius>] [raised?]",
+            desc = "Generates a hollow sphere.",
+            help =
+                    "Generates a hollow sphere.\n" +
+                            "By specifying 3 radii, separated by commas,\n" +
+                            "you can generate an ellipsoid. The order of the ellipsoid radii\n" +
+                            "is north/south, up/down, east/west.",
+            min = 2,
+            max = 3
     )
     @CommandPermissions("worldedit.generation.sphere")
     @Logging(PLACEMENT)
@@ -140,17 +146,17 @@ public class GenerationCommands {
     }
 
     @Command(
-        aliases = { "/sphere" },
-        usage = "<block> <radius>[,<radius>,<radius>] [raised?]",
-        flags = "h",
-        desc = "Generates a filled sphere.",
-        help =
-            "Generates a filled sphere.\n" +
-            "By specifying 3 radii, separated by commas,\n" +
-            "you can generate an ellipsoid. The order of the ellipsoid radii\n" +
-            "is north/south, up/down, east/west.",
-        min = 2,
-        max = 3
+            aliases = {"/sphere"},
+            usage = "<block> <radius>[,<radius>,<radius>] [raised?]",
+            flags = "h",
+            desc = "Generates a filled sphere.",
+            help =
+                    "Generates a filled sphere.\n" +
+                            "By specifying 3 radii, separated by commas,\n" +
+                            "you can generate an ellipsoid. The order of the ellipsoid radii\n" +
+                            "is north/south, up/down, east/west.",
+            min = 2,
+            max = 3
     )
     @CommandPermissions("worldedit.generation.sphere")
     @Logging(PLACEMENT)
@@ -158,19 +164,19 @@ public class GenerationCommands {
         String[] radii = radiusString.split(",");
         final double radiusX, radiusY, radiusZ;
         switch (radii.length) {
-        case 1:
-            radiusX = radiusY = radiusZ = Math.max(1, Double.parseDouble(radii[0]));
-            break;
+            case 1:
+                radiusX = radiusY = radiusZ = Math.max(1, Double.parseDouble(radii[0]));
+                break;
 
-        case 3:
-            radiusX = Math.max(1, Double.parseDouble(radii[0]));
-            radiusY = Math.max(1, Double.parseDouble(radii[1]));
-            radiusZ = Math.max(1, Double.parseDouble(radii[2]));
-            break;
+            case 3:
+                radiusX = Math.max(1, Double.parseDouble(radii[0]));
+                radiusY = Math.max(1, Double.parseDouble(radii[1]));
+                radiusZ = Math.max(1, Double.parseDouble(radii[2]));
+                break;
 
-        default:
-            player.printError("You must either specify 1 or 3 radius values.");
-            return;
+            default:
+                player.printError("You must either specify 1 or 3 radius values.");
+                return;
         }
 
         worldEdit.checkMaxRadius(radiusX);
@@ -188,11 +194,11 @@ public class GenerationCommands {
     }
 
     @Command(
-        aliases = { "forestgen" },
-        usage = "[size] [type] [density]",
-        desc = "Generate a forest",
-        min = 0,
-        max = 3
+            aliases = {"forestgen"},
+            usage = "[size] [type] [density]",
+            desc = "Generate a forest",
+            min = 0,
+            max = 3
     )
     @CommandPermissions("worldedit.generation.forest")
     @Logging(POSITION)
@@ -204,11 +210,11 @@ public class GenerationCommands {
     }
 
     @Command(
-        aliases = { "pumpkins" },
-        usage = "[size]",
-        desc = "Generate pumpkin patches",
-        min = 0,
-        max = 1
+            aliases = {"pumpkins"},
+            usage = "[size]",
+            desc = "Generate pumpkin patches",
+            min = 0,
+            max = 1
     )
     @CommandPermissions("worldedit.generation.pumpkins")
     @Logging(POSITION)
@@ -218,7 +224,7 @@ public class GenerationCommands {
     }
 
     @Command(
-            aliases = { "/hpyramid" },
+            aliases = {"/hpyramid"},
             usage = "<block> <size>",
             desc = "Generate a hollow pyramid",
             min = 2,
@@ -231,12 +237,12 @@ public class GenerationCommands {
     }
 
     @Command(
-        aliases = { "/pyramid" },
-        usage = "<block> <size>",
-        flags = "h",
-        desc = "Generate a filled pyramid",
-        min = 2,
-        max = 2
+            aliases = {"/pyramid"},
+            usage = "<block> <size>",
+            flags = "h",
+            desc = "Generate a filled pyramid",
+            min = 2,
+            max = 2
     )
     @CommandPermissions("worldedit.generation.pyramid")
     @Logging(PLACEMENT)
@@ -249,23 +255,23 @@ public class GenerationCommands {
     }
 
     @Command(
-        aliases = { "/generate", "/gen", "/g" },
-        usage = "<block> <expression>",
-        desc = "Generates a shape according to a formula.",
-        help =
-            "Generates a shape according to a formula that is expected to\n" +
-            "return positive numbers (true) if the point is inside the shape\n" +
-            "Optionally set type/data to the desired block.\n" +
-            "Flags:\n" +
-            "  -h to generate a hollow shape\n" +
-            "  -r to use raw minecraft coordinates\n" +
-            "  -o is like -r, except offset from placement.\n" +
-            "  -c is like -r, except offset selection center.\n" +
-            "If neither -r nor -o is given, the selection is mapped to -1..1\n" +
-            "See also tinyurl.com/wesyntax.",
-        flags = "hroc",
-        min = 2,
-        max = -1
+            aliases = {"/generate", "/gen", "/g"},
+            usage = "<block> <expression>",
+            desc = "Generates a shape according to a formula.",
+            help =
+                    "Generates a shape according to a formula that is expected to\n" +
+                            "return positive numbers (true) if the point is inside the shape\n" +
+                            "Optionally set type/data to the desired block.\n" +
+                            "Flags:\n" +
+                            "  -h to generate a hollow shape\n" +
+                            "  -r to use raw minecraft coordinates\n" +
+                            "  -o is like -r, except offset from placement.\n" +
+                            "  -c is like -r, except offset selection center.\n" +
+                            "If neither -r nor -o is given, the selection is mapped to -1..1\n" +
+                            "See also tinyurl.com/wesyntax.",
+            flags = "hroc",
+            min = 2,
+            max = -1
     )
     @CommandPermissions("worldedit.generation.shape")
     @Logging(ALL)
@@ -315,23 +321,23 @@ public class GenerationCommands {
     }
 
     @Command(
-        aliases = { "/generatebiome", "/genbiome", "/gb" },
-        usage = "<biome> <expression>",
-        desc = "Sets biome according to a formula.",
-        help =
-            "Generates a shape according to a formula that is expected to\n" +
-            "return positive numbers (true) if the point is inside the shape\n" +
-            "Sets the biome of blocks in that shape.\n" +
-            "Flags:\n" +
-            "  -h to generate a hollow shape\n" +
-            "  -r to use raw minecraft coordinates\n" +
-            "  -o is like -r, except offset from placement.\n" +
-            "  -c is like -r, except offset selection center.\n" +
-            "If neither -r nor -o is given, the selection is mapped to -1..1\n" +
-            "See also tinyurl.com/wesyntax.",
-        flags = "hroc",
-        min = 2,
-        max = -1
+            aliases = {"/generatebiome", "/genbiome", "/gb"},
+            usage = "<biome> <expression>",
+            desc = "Sets biome according to a formula.",
+            help =
+                    "Generates a shape according to a formula that is expected to\n" +
+                            "return positive numbers (true) if the point is inside the shape\n" +
+                            "Sets the biome of blocks in that shape.\n" +
+                            "Flags:\n" +
+                            "  -h to generate a hollow shape\n" +
+                            "  -r to use raw minecraft coordinates\n" +
+                            "  -o is like -r, except offset from placement.\n" +
+                            "  -c is like -r, except offset selection center.\n" +
+                            "If neither -r nor -o is given, the selection is mapped to -1..1\n" +
+                            "See also tinyurl.com/wesyntax.",
+            flags = "hroc",
+            min = 2,
+            max = -1
     )
     @CommandPermissions({"worldedit.generation.shape", "worldedit.biome.set"})
     @Logging(ALL)
@@ -379,4 +385,180 @@ public class GenerationCommands {
         }
     }
 
+
+
+    //Added for our Software Architecture project
+    @Command(
+            aliases = {"/hofloor"},
+            usage = "<block> <size> <width>",
+            flags = "n",
+            desc = "Generate a house floor",
+            min = 3,
+            max = 4
+    )
+    @CommandPermissions("worldedit.generation.housefloor")
+    @Logging(PLACEMENT)
+    public void houseFloor(Player player, LocalSession session, EditSession editSession, Pattern pattern, @Range(min = 1) int size, @Range(min = 1) int width, @Switch('n') boolean newHouse) throws WorldEditException {
+        Vector pos = session.getPlacementPosition(player);
+        worldEdit.checkMaxRadius(size);
+        int affected = 0;
+        if (newHouse || coords == null) {
+            affected = editSession.makeHouseFloor(pos, Patterns.wrap(pattern), size, width);
+            houses++;
+            coords = editSession.coordinates;
+            history.put(houses, coords);
+            player.print("Created house No: " + houses);
+        } else {
+            affected = editSession.makeHouseFloor(coords, Patterns.wrap(pattern), size, width);
+        }
+
+        player.findFreePosition();
+        player.print(affected + " block(s) of fancy floor have been created. At: " + editSession.coordinates.getX() + " " + editSession.coordinates.getZ());
+    }
+
+    @Command(
+            aliases = {"/hocarcass"},
+            usage = "<block> <size> <width>",
+            flags = "n",
+            desc = "Generate a house carcass",
+            min = 3,
+            max = 4
+    )
+    @CommandPermissions("worldedit.generation.housecarcass")
+    @Logging(PLACEMENT)
+    public void houseCarcass(Player player, LocalSession session, EditSession editSession, Pattern pattern, @Range(min = 1) int size, @Range(min = 1) int width, @Switch('n') boolean newHouse) throws WorldEditException {
+        Vector pos = session.getPlacementPosition(player);
+        worldEdit.checkMaxRadius(size);
+        int affected = 0;
+
+
+        if (newHouse || coords == null) {
+            affected = editSession.makeHouseCarcass(pos, Patterns.wrap(pattern), size, width);
+            houses++;
+            coords = editSession.coordinates;
+            history.put(houses, coords);
+            player.print("Created house No: " + houses);
+        } else {
+            affected = editSession.makeHouseCarcass(coords, Patterns.wrap(pattern), size, width);
+
+        }
+
+        player.findFreePosition();
+        player.print(affected + " block(s) of cool carcass have been created. At: " + editSession.coordinates.getX() + " " + editSession.coordinates.getZ());
+        coords = editSession.coordinates;
+
+
+    }
+
+    @Command(
+            aliases = {"/howalls"},
+            usage = "<block> <length> <width>",
+            flags = "n",
+            desc = "Generate house walls",
+            min = 3,
+            max = 3
+    )
+    @CommandPermissions("worldedit.generation.housewalls")
+    @Logging(PLACEMENT)
+    public void houseWalls(Player player, LocalSession session, EditSession editSession, Pattern pattern, @Range(min = 1) int length, @Range(min = 1) int width, @Switch('n') boolean newHouse) throws WorldEditException {
+        Vector pos = session.getPlacementPosition(player);
+        worldEdit.checkMaxRadius(length);
+        int affected = 0;
+
+        if (newHouse || coords == null) {
+            affected = editSession.makeHouseWalls(pos, Patterns.wrap(pattern), length, width);
+            houses++;
+            coords = editSession.coordinates;
+            history.put(houses, coords);
+            player.print("Created house No: " + houses);
+        } else {
+            affected = editSession.makeHouseWalls(coords, Patterns.wrap(pattern), length, width);
+        }
+        coords = editSession.coordinates;
+        player.findFreePosition();
+        player.print(affected + " block(s) of cool walls have been created. At: " + editSession.coordinates.getX() + " " + editSession.coordinates.getZ());
+
+    }
+
+    @Command(
+            aliases = {"/horoof"},
+            usage = "<block> <length> <width>",
+            flags = "n",
+            desc = "Generate house walls",
+            min = 3,
+            max = 3
+    )
+    @CommandPermissions("worldedit.generation.housewalls")
+    @Logging(PLACEMENT)
+    public void houseRoof(Player player, LocalSession session, EditSession editSession, Pattern pattern, @Range(min = 1) int length, @Range(min = 1) int width, @Switch('n') boolean newHouse) throws WorldEditException {
+        Vector pos = session.getPlacementPosition(player);
+        worldEdit.checkMaxRadius(length);
+        int affected = 0;
+
+        if (newHouse || coords == null) {
+            affected = editSession.makeHouseRoof(pos, Patterns.wrap(pattern), length, width);
+            houses++;
+            coords = editSession.coordinates;
+            history.put(houses, coords);
+            player.print("Created house No: " + houses);
+        } else {
+            affected = editSession.makeHouseRoof(coords, Patterns.wrap(pattern), length, width);
+        }
+        coords = editSession.coordinates;
+        player.findFreePosition();
+        player.print(affected + " block(s) of cool walls have been created. At: " + editSession.coordinates.getX() + " " + editSession.coordinates.getZ());
+
+    }
+
+    @Command(
+            aliases = {"/house"},
+            usage = "<block> <length> <width>",
+            flags = "n",
+            desc = "Generate house walls",
+            min = 3,
+            max = 3
+    )
+    @CommandPermissions("worldedit.generation.housewalls")
+    @Logging(PLACEMENT)
+    public void house(Player player, LocalSession session, EditSession editSession, Pattern pattern, @Range(min = 1) int length, @Range(min = 1) int width, @Switch('n') boolean newHouse) throws WorldEditException {
+        Vector pos = session.getPlacementPosition(player);
+        worldEdit.checkMaxRadius(length);
+        int affected = 0;
+        affected += editSession.makeHouseFloor(pos, Patterns.wrap(pattern), length, width);
+        affected += editSession.makeHouseCarcass(pos, Patterns.wrap(pattern), length, width);
+        affected += editSession.makeHouseWalls(pos, Patterns.wrap(pattern), length, width);
+        affected += editSession.makeHouseRoof(pos, Patterns.wrap(pattern), length, width);
+        houses++;
+        coords = editSession.coordinates;
+        history.put(houses, coords);
+        player.print("Created house No: " + houses);
+        coords = editSession.coordinates;
+        player.findFreePosition();
+        player.print(affected + " block(s) of cool walls have been created. At: " + editSession.coordinates.getX() + " " + editSession.coordinates.getZ());
+
+    }
+
+
+    @Command(
+            aliases = {"/switchho"},
+            usage = "<number>",
+            flags = "n",
+            desc = "Generate a house carcass",
+            min = 0,
+            max = 1
+    )
+    @CommandPermissions("worldedit.generation.housecarcass")
+    @Logging(PLACEMENT)
+    public void switchHouse(Player player, LocalSession session, EditSession editSession, @Optional("0") int number) throws WorldEditException {
+
+        if (number == 0) {
+            player.print("Switched to previous house");
+            coords = history.get(houses - 1);
+        } else {
+            coords = history.get(number);
+            player.print("Switched to house No: " + number);
+        }
+
+
+    }
 }
