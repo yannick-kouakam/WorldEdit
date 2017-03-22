@@ -2352,24 +2352,7 @@ public class EditSession implements Extent {
         return (x * x) + (z * z);
     }
 
-    public class Coordinates {
-        public double longitude;
-        public double latitude;
-
-        public Coordinates(double lon, double lat) {
-            this.longitude = lon;
-            this.latitude = lat;
-        }
-
-        public double getLongitude() {
-            return this.longitude;
-        }
-
-        public double getLatitude() {
-            return this.latitude;
-        }
-    }
-
+    //Our contribution for Software Architecture project
     public Vector coordinates = null;
 
     /**
@@ -2385,12 +2368,21 @@ public class EditSession implements Extent {
      */
     public int makeHouseFloor(Vector position, Pattern block, int length, int width) throws MaxChangedBlocksException {
         int affected = 0;
-
         length--;
         length /= 2;
         width--;
         width /= 2;
-
+        /*
+        Go down until the ground. It is needed because houses should,t fly in the air.
+        Originally, worldedit provides generating structures
+        around a player, often they appear to be flying in the air.
+        */
+        int nowY = position.getBlockY();
+        while(world.getBlock(position).getId() == 0){
+            nowY--;
+            position = new Vector(position.getBlockX(), nowY, position.getZ());
+        }
+        //Creation of the floor
         for (int x = 0; x <= length; x++) {
             for (int z = 0; z <= width; z++) {
                 if ((z <= width && x <= length) || z == width || x == length) {
@@ -2399,6 +2391,7 @@ public class EditSession implements Extent {
 
             }
         }
+        //Coordinates will be passed to GenerationCommands class.
         coordinates = position;
         return affected;
     }
@@ -2408,8 +2401,8 @@ public class EditSession implements Extent {
      *
      * @param position a position
      * @param block    a block
-     * @param length     size of pyramid
-     *
+     * @param length     size of carcass
+     * @param width     size of carcass
      * @return number of blocks changed
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
@@ -2421,8 +2414,18 @@ public class EditSession implements Extent {
         length /= 2;
         width--;
         width /= 2;
-
-        for (int i = 1; i < 5; i++) {
+        /*
+        Go down until the ground. It is needed because houses should,t fly in the air.
+        Originally, worldedit provides generating structures
+        around a player, often they appear to be flying in the air.
+        */
+        int nowY = position.getBlockY();
+        while(world.getBlock(position).getId() == 0){
+            nowY--;
+            position = new Vector(position.getBlockX(), nowY, position.getZ());
+        }
+        //Four columns in the corners
+        for (int i = 1; i < 6; i++) {
             affected += generateFourDims(position, block, length, i, width);
         }
 
@@ -2438,8 +2441,17 @@ public class EditSession implements Extent {
         length /= 2;
         width--;
         width /= 2;
-
-        for (int i = 1; i < 5; i++) {
+        /*
+        Go down until the ground. It is needed because houses should,t fly in the air.
+        Originally, worldedit provides generating structures
+        around a player, often they appear to be flying in the air.
+        */
+        int nowY = position.getBlockY();
+        while(world.getBlock(position).getId() == 0){
+            nowY--;
+            position = new Vector(position.getBlockX(), nowY, position.getZ());
+        }
+        for (int i = 1; i < 6; i++) {
             for (int j = 0; j < length; j++) {
                 affected += generateFourDims(position, block, j, i, width);
             }
@@ -2448,9 +2460,17 @@ public class EditSession implements Extent {
             }
 
         }
+        //Create three windows
         if (setBlock(position.add(length, 2, 0), new BaseBlock(20))) {
             ++affected;
         }
+        if (setBlock(position.add(-length, 2, 0), new BaseBlock(20))) {
+            ++affected;
+        }
+        if (setBlock(position.add(0, 2, -width), new BaseBlock(20))) {
+            ++affected;
+        }
+        //create door. id: 0 is an empty space
         if (setBlock(position.add(0, 2, width), new BaseBlock(0))) {
             ++affected;
         }
@@ -2472,22 +2492,46 @@ public class EditSession implements Extent {
         length /= 2;
         width--;
         width /= 2;
-
+        /*
+        Go down until the ground. It is needed because houses should,t fly in the air.
+        Originally, worldedit provides generating structures
+        around a player, often they appear to be flying in the air.
+        */
+        int nowY = position.getBlockY();
+        while(world.getBlock(position).getId() == 0){
+            nowY--;
+            position = new Vector(position.getBlockX(), nowY, position.getZ());
+        }
         int y = 5;
-        for (int z = width; z >=0 ; z--){
-            for (int x = length; x >=0 ; x--){
+        //Roof form
+        for (int x = length+1; x >=0 ; x--){
+            for (int z = width; z >=0 ; z--){
                 affected += generateFourDims(position, block, x, y, z);
             }
-
+            //Fulfill roof
+            for(int i = 0; i < x; i++){
+                affected += generateFourDims(position, block, i, y, width);
+                affected += generateFourDims(position, block, i, y, width+1);
+            }
             y++;
         }
+        //ceiling
+        for (int x = 0; x <= length; x++) {
+            for (int z = 0; z <= width; z++) {
+                if ((z <= width && x <= length) || z == width || x == length) {
+                    affected += generateFourDims(position, block, x, 6, z);
+                }
+
+            }
+        }
+
 
 
         coordinates = position;
         return affected;
     }
 
-
+    //This command generates four blocks in one plane around the center
     private int generateFourDims(Vector position, Pattern block, int length, int height, int width) throws MaxChangedBlocksException {
         int affected = 0;
         if (setBlock(position.add(length, height, width), block)) {
