@@ -389,7 +389,7 @@ public class GenerationCommands {
 
     //Added for our Software Architecture project
     @Command(
-            aliases = {"/hofloor"},
+            aliases = {"/floor"},
             usage = "<block> <size> <width>",
             flags = "n",
             desc = "Generate a house floor",
@@ -400,24 +400,27 @@ public class GenerationCommands {
     @Logging(PLACEMENT)
     public void houseFloor(Player player, LocalSession session, EditSession editSession, Pattern pattern, @Range(min = 1) int size, @Range(min = 1) int width, @Switch('n') boolean newHouse) throws WorldEditException {
         Vector pos = session.getPlacementPosition(player);
+
         worldEdit.checkMaxRadius(size);
         int affected = 0;
         if (newHouse || coords == null) {
+            //New house created
             affected = editSession.makeHouseFloor(pos, Patterns.wrap(pattern), size, width);
             houses++;
             coords = editSession.coordinates;
             history.put(houses, coords);
             player.print("Created house No: " + houses);
         } else {
+            //Working with existing house
             affected = editSession.makeHouseFloor(coords, Patterns.wrap(pattern), size, width);
         }
-
+        coords = editSession.coordinates;
         player.findFreePosition();
         player.print(affected + " block(s) of fancy floor have been created. At: " + editSession.coordinates.getX() + " " + editSession.coordinates.getZ());
     }
 
     @Command(
-            aliases = {"/hocarcass"},
+            aliases = {"/carcass"},
             usage = "<block> <size> <width>",
             flags = "n",
             desc = "Generate a house carcass",
@@ -431,14 +434,15 @@ public class GenerationCommands {
         worldEdit.checkMaxRadius(size);
         int affected = 0;
 
-
         if (newHouse || coords == null) {
+            //New house created
             affected = editSession.makeHouseCarcass(pos, Patterns.wrap(pattern), size, width);
             houses++;
             coords = editSession.coordinates;
             history.put(houses, coords);
             player.print("Created house No: " + houses);
         } else {
+            //Working with existing house
             affected = editSession.makeHouseCarcass(coords, Patterns.wrap(pattern), size, width);
 
         }
@@ -451,7 +455,7 @@ public class GenerationCommands {
     }
 
     @Command(
-            aliases = {"/howalls"},
+            aliases = {"/wals"},
             usage = "<block> <length> <width>",
             flags = "n",
             desc = "Generate house walls",
@@ -466,12 +470,14 @@ public class GenerationCommands {
         int affected = 0;
 
         if (newHouse || coords == null) {
+            //New house created
             affected = editSession.makeHouseWalls(pos, Patterns.wrap(pattern), length, width);
             houses++;
             coords = editSession.coordinates;
             history.put(houses, coords);
             player.print("Created house No: " + houses);
         } else {
+            //Working with existing house
             affected = editSession.makeHouseWalls(coords, Patterns.wrap(pattern), length, width);
         }
         coords = editSession.coordinates;
@@ -481,7 +487,7 @@ public class GenerationCommands {
     }
 
     @Command(
-            aliases = {"/horoof"},
+            aliases = {"/roof"},
             usage = "<block> <length> <width>",
             flags = "n",
             desc = "Generate house walls",
@@ -496,12 +502,14 @@ public class GenerationCommands {
         int affected = 0;
 
         if (newHouse || coords == null) {
+            //New house created
             affected = editSession.makeHouseRoof(pos, Patterns.wrap(pattern), length, width);
             houses++;
             coords = editSession.coordinates;
             history.put(houses, coords);
             player.print("Created house No: " + houses);
         } else {
+            //Working with existing house
             affected = editSession.makeHouseRoof(coords, Patterns.wrap(pattern), length, width);
         }
         coords = editSession.coordinates;
@@ -540,7 +548,7 @@ public class GenerationCommands {
 
 
     @Command(
-            aliases = {"/switchho"},
+            aliases = {"/switch"},
             usage = "<number>",
             flags = "n",
             desc = "Generate a house carcass",
@@ -551,10 +559,15 @@ public class GenerationCommands {
     @Logging(PLACEMENT)
     public void switchHouse(Player player, LocalSession session, EditSession editSession, @Optional("0") int number) throws WorldEditException {
 
+        if(number > houses){
+            player.print("There is no house with such number");
+            return;
+        }
         if (number == 0) {
             player.print("Switched to previous house");
             coords = history.get(houses - 1);
         } else {
+            //Switching house (done via coordinates)
             coords = history.get(number);
             player.print("Switched to house No: " + number);
         }
