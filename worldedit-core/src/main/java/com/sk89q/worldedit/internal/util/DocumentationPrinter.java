@@ -61,7 +61,7 @@ public final class DocumentationPrinter {
     private static List<Class<?>> getCommandClasses(File dir) {
         List<Class<?>> classes = new ArrayList<Class<?>>();
 
-        //classes.add(BiomeCommands.class);
+
         classes.add(ChunkCommands.class);
         classes.add(ClipboardCommands.class);
         classes.add(GeneralCommands.class);
