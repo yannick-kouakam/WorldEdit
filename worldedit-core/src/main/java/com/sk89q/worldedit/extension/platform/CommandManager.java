@@ -109,7 +109,7 @@ public final class CommandManager {
         dispatcher = new CommandGraph()
                 .builder(builder)
                     .commands()
-                        .registerMethods(new BiomeCommands(worldEdit))
+                        //.registerMethods(new BiomeCommands(worldEdit))
                         .registerMethods(new ChunkCommands(worldEdit))
                         .registerMethods(new ClipboardCommands(worldEdit))
                         .registerMethods(new GeneralCommands(worldEdit))

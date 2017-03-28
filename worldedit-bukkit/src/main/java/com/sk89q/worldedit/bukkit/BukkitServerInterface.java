@@ -49,13 +49,11 @@ public class BukkitServerInterface extends ServerInterface implements MultiUserP
     public Server server;
     public WorldEditPlugin plugin;
     private CommandRegistration dynamicCommands;
-    private BukkitBiomeRegistry biomes;
     private boolean hookingEvents;
 
     public BukkitServerInterface(WorldEditPlugin plugin, Server server) {
         this.plugin = plugin;
         this.server = server;
-        this.biomes = new BukkitBiomeRegistry();
         dynamicCommands = new CommandRegistration(plugin);
     }
 

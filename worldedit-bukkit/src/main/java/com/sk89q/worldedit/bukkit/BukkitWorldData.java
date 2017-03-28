@@ -28,17 +28,11 @@ import com.sk89q.worldedit.world.registry.LegacyWorldData;
 class BukkitWorldData extends LegacyWorldData {
 
     private static final BukkitWorldData INSTANCE = new BukkitWorldData();
-    private final BiomeRegistry biomeRegistry = new BukkitBiomeRegistry();
 
     /**
      * Create a new instance.
      */
     BukkitWorldData() {
-    }
-
-    @Override
-    public BiomeRegistry getBiomeRegistry() {
-        return biomeRegistry;
     }
 
     /**
