@@ -19,7 +19,7 @@
 
 package com.sk89q.worldedit.sponge;
 
-import com.sk89q.worldedit.world.registry.BiomeRegistry;
+//import com.sk89q.worldedit.world.registry.BiomeRegistry;
 import com.sk89q.worldedit.world.registry.LegacyWorldData;
 
 /**
@@ -28,13 +28,13 @@ import com.sk89q.worldedit.world.registry.LegacyWorldData;
 class SpongeWorldData extends LegacyWorldData {
 
     private static final SpongeWorldData INSTANCE = new SpongeWorldData();
-    private final BiomeRegistry biomeRegistry = new SpongeBiomeRegistry();
+    //private final BiomeRegistry biomeRegistry = new SpongeBiomeRegistry();
 
-    @Override
+  /*  @Override
     public BiomeRegistry getBiomeRegistry() {
         return biomeRegistry;
     }
-
+*/
     /**
      * Get a static instance.
      *

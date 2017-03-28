@@ -20,7 +20,6 @@
 package com.sk89q.worldedit.world.biome;
 
 import com.google.common.base.Function;
-import com.sk89q.worldedit.world.registry.BiomeRegistry;
 
 import javax.annotation.Nullable;
 

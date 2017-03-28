@@ -29,7 +29,7 @@ public class LegacyWorldData implements WorldData {
     private final LegacyBlockRegistry blockRegistry = new LegacyBlockRegistry();
     private final NullItemRegistry itemRegistry = new NullItemRegistry();
     private final NullEntityRegistry entityRegistry = new NullEntityRegistry();
-    private final NullBiomeRegistry biomeRegistry = new NullBiomeRegistry();
+    //private final NullBiomeRegistry biomeRegistry = new NullBiomeRegistry();
 
     /**
      * Create a new instance.
@@ -51,11 +51,11 @@ public class LegacyWorldData implements WorldData {
     public EntityRegistry getEntityRegistry() {
         return entityRegistry;
     }
-
+/*
     @Override
     public BiomeRegistry getBiomeRegistry() {
         return biomeRegistry;
-    }
+    }*/
 
     /**
      * Get a singleton instance.

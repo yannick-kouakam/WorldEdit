@@ -29,29 +29,7 @@ import java.util.List;
 /**
  * A biome registry that knows nothing.
  */
-public class NullBiomeRegistry implements BiomeRegistry {
+public class NullBiomeRegistry  {
 
-    /**
-     * Create a new instance.
-     */
-    public NullBiomeRegistry() {
-    }
-
-    @Nullable
-    @Override
-    public BaseBiome createFromId(int id) {
-        return null;
-    }
-
-    @Override
-    public List<BaseBiome> getBiomes() {
-        return Collections.emptyList();
-    }
-
-    @Nullable
-    @Override
-    public BiomeData getData(BaseBiome biome) {
-        return null;
-    }
 
 }

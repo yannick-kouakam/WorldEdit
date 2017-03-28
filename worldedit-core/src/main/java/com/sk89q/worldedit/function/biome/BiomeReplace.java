@@ -30,17 +30,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Replaces the biome at the locations that this function is applied to.
  */
-public class BiomeReplace implements FlatRegionFunction {
+//public class BiomeReplace implements FlatRegionFunction {
 
-    private final Extent extent;
-    private BaseBiome biome;
+  //  private final Extent extent;
+   // private BaseBiome biome;
 
     /**
      * Create a new instance.
      *
      * @param extent an extent
      * @param biome a biome
-     */
+   /*  *//*
     public BiomeReplace(Extent extent, BaseBiome biome) {
         checkNotNull(extent);
         checkNotNull(biome);
@@ -51,6 +51,6 @@ public class BiomeReplace implements FlatRegionFunction {
     @Override
     public boolean apply(Vector2D position) throws WorldEditException {
         return extent.setBiome(position, biome);
-    }
+    }*/
 
-}
+//}

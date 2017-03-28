@@ -109,7 +109,7 @@ public class LocalWorldAdapter extends LocalWorld {
         return world.clearContainerBlockContents(position);
     }
 
-    @Override
+    /*@Override
     public BaseBiome getBiome(Vector2D position) {
         return world.getBiome(position);
     }
@@ -117,7 +117,7 @@ public class LocalWorldAdapter extends LocalWorld {
     @Override
     public boolean setBiome(Vector2D position, BaseBiome biome) {
         return world.setBiome(position, biome);
-    }
+    }*/
 
     @Override
     public void dropItem(Vector position, BaseItemStack item, int count) {

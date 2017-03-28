@@ -48,7 +48,7 @@ import com.sk89q.worldedit.util.command.parametric.ParameterException;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.biome.BaseBiome;
 import com.sk89q.worldedit.world.biome.Biomes;
-import com.sk89q.worldedit.world.registry.BiomeRegistry;
+//import com.sk89q.worldedit.world.registry.BiomeRegistry;
 
 import java.util.Arrays;
 import java.util.List;
@@ -298,10 +298,10 @@ public class WorldEditBinding extends BindingHelper {
      * @throws ParameterException on error
      * @throws WorldEditException on error
      */
-    @BindingMatch(type = BaseBiome.class,
+   /* @BindingMatch(type = BaseBiome.class,
                   behavior = BindingBehavior.CONSUMES,
-                  consumedCount = 1)
-    public BaseBiome getBiomeType(ArgumentStack context) throws ParameterException, WorldEditException {
+                  consumedCount = 1)*/
+    /*public BaseBiome getBiomeType(ArgumentStack context) throws ParameterException, WorldEditException {
         String input = context.next();
         if (input != null) {
             Actor actor = context.getContext().getLocals().get(Actor.class);
@@ -317,20 +317,20 @@ public class WorldEditBinding extends BindingHelper {
                 throw new ParameterException("An entity is required.");
             }
 
-            BiomeRegistry biomeRegistry = world.getWorldData().getBiomeRegistry();
+            *//*BiomeRegistry biomeRegistry = world.getWorldData().getBiomeRegistry();
             List<BaseBiome> knownBiomes = biomeRegistry.getBiomes();
-            BaseBiome biome = Biomes.findBiomeByName(knownBiomes, input, biomeRegistry);
-            if (biome != null) {
+            BaseBiome biome = Biomes.findBiomeByName(knownBiomes, input, biomeRegistry);*//*
+            *//*if (biome != null) {
                 return biome;
             } else {
                 throw new ParameterException(
                         String.format("Can't recognize biome type '%s' -- use /biomelist to list available types", input));
-            }
+            }*//*
         } else {
             throw new ParameterException(
                     "This command takes a 'default' biome if one is not set, except there is no particular " +
                             "biome that should be 'default', so the command should not be taking a default biome");
         }
-    }
+    }*/
 
 }

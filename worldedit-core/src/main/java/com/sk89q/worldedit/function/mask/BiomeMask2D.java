@@ -33,7 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Tests true if the biome at applied points is the same as the one given.
  */
-public class BiomeMask2D extends AbstractMask2D {
+public abstract class  BiomeMask2D extends AbstractMask2D {
 
     private final Extent extent;
     private final Set<BaseBiome> biomes = new HashSet<BaseBiome>();
@@ -89,10 +89,10 @@ public class BiomeMask2D extends AbstractMask2D {
         return biomes;
     }
 
-    @Override
+   /* @Override
     public boolean test(Vector2D vector) {
         BaseBiome biome = extent.getBiome(vector);
         return biomes.contains(biome);
-    }
+    }*/
 
 }

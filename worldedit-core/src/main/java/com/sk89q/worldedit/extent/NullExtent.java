@@ -78,21 +78,21 @@ public class NullExtent implements Extent {
         return new BaseBlock(0);
     }
 
-    @Nullable
+  /*  @Nullable
     @Override
     public BaseBiome getBiome(Vector2D position) {
         return null;
     }
-
+*/
     @Override
     public boolean setBlock(Vector position, BaseBlock block) throws WorldEditException {
         return false;
     }
-
+/*
     @Override
     public boolean setBiome(Vector2D position, BaseBiome biome) {
         return false;
-    }
+    }*/
 
     @Nullable
     @Override

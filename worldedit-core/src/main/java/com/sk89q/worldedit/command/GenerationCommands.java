@@ -320,7 +320,7 @@ public class GenerationCommands {
         }
     }
 
-    @Command(
+   /* @Command(
             aliases = {"/generatebiome", "/genbiome", "/gb"},
             usage = "<biome> <expression>",
             desc = "Sets biome according to a formula.",
@@ -384,7 +384,7 @@ public class GenerationCommands {
             player.printError(e.getMessage());
         }
     }
-
+*/
 
 
     //Added for our Software Architecture project

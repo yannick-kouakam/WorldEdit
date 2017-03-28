@@ -46,7 +46,7 @@ import com.sk89q.worldedit.session.request.Request;
 import com.sk89q.worldedit.session.request.RequestSelection;
 import com.sk89q.worldedit.world.biome.BaseBiome;
 import com.sk89q.worldedit.world.biome.Biomes;
-import com.sk89q.worldedit.world.registry.BiomeRegistry;
+
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -125,10 +125,10 @@ class DefaultMaskParser extends InputParser<Mask> {
                 OffsetMask offsetMask = new OffsetMask(submask, new Vector(0, firstChar == '>' ? -1 : 1, 0));
                 return new MaskIntersection(offsetMask, Masks.negate(submask));
 
-            case '$':
+           /* case '$':
                 Set<BaseBiome> biomes = new HashSet<BaseBiome>();
                 String[] biomesList = component.substring(1).split(",");
-                BiomeRegistry biomeRegistry = context.requireWorld().getWorldData().getBiomeRegistry();
+                //BiomeRegistry biomeRegistry = context.requireWorld().getWorldData().getBiomeRegistry();
                 List<BaseBiome> knownBiomes = biomeRegistry.getBiomes();
                 for (String biomeName : biomesList) {
                     BaseBiome biome = Biomes.findBiomeByName(knownBiomes, biomeName, biomeRegistry);
@@ -138,7 +138,7 @@ class DefaultMaskParser extends InputParser<Mask> {
                     biomes.add(biome);
                 }
 
-                return Masks.asMask(new BiomeMask2D(context.requireExtent(), biomes));
+                return Masks.asMask(new BiomeMask2D(context.requireExtent(), biomes));*/
 
             case '%':
                 int i = Integer.parseInt(component.substring(1));

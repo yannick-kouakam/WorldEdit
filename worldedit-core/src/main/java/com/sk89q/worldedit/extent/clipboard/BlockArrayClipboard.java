@@ -148,7 +148,7 @@ public class BlockArrayClipboard implements Clipboard {
         }
     }
 
-    @Override
+   /* @Override
     public BaseBiome getBiome(Vector2D position) {
         return new BaseBiome(0);
     }
@@ -156,7 +156,7 @@ public class BlockArrayClipboard implements Clipboard {
     @Override
     public boolean setBiome(Vector2D position, BaseBiome biome) {
         return false;
-    }
+    }*/
 
     @Nullable
     @Override

@@ -25,7 +25,7 @@ import com.google.common.base.Optional;
 import com.sk89q.worldedit.util.WeightedChoice;
 import com.sk89q.worldedit.util.WeightedChoice.Choice;
 import com.sk89q.worldedit.util.function.LevenshteinDistance;
-import com.sk89q.worldedit.world.registry.BiomeRegistry;
+//import com.sk89q.worldedit.world.registry.BiomeRegistry;
 
 import javax.annotation.Nullable;
 import java.util.Collection;

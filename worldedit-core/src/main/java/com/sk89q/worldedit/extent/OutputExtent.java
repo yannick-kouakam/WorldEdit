@@ -59,7 +59,7 @@ public interface OutputExtent {
      * @param biome the biome to set to
      * @return true if the biome was successfully set (return value may not be accurate)
      */
-    boolean setBiome(Vector2D position, BaseBiome biome);
+    //boolean setBiome(Vector2D position, BaseBiome biome);
 
     /**
      * Return an {@link Operation} that should be called to tie up loose ends

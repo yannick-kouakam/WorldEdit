@@ -51,6 +51,6 @@ public interface WorldData {
      *
      * @return the biome registry
      */
-    BiomeRegistry getBiomeRegistry();
+   // BiomeRegistry getBiomeRegistry();
 
 }

@@ -21,7 +21,7 @@ package com.sk89q.worldedit.sponge;
 
 import com.sk89q.worldedit.world.biome.BaseBiome;
 import com.sk89q.worldedit.world.biome.BiomeData;
-import com.sk89q.worldedit.world.registry.BiomeRegistry;
+//import com.sk89q.worldedit.world.registry.BiomeRegistry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.world.biome.BiomeType;
 
@@ -32,45 +32,3 @@ import java.util.List;
 /**
  * Provides access to biome data in Sponge.
  */
-class SpongeBiomeRegistry implements BiomeRegistry {
-
-    @Nullable
-    @Override
-    public BaseBiome createFromId(int id) {
-        return new BaseBiome(id);
-    }
-
-    @Override
-    public List<BaseBiome> getBiomes() {
-        List<BaseBiome> list = new ArrayList<BaseBiome>();
-        for (BiomeType biome : Sponge.getGame().getRegistry().getAllOf(BiomeType.class)) {
-            list.add(new BaseBiome(SpongeWorldEdit.inst().getAdapter().resolve(biome)));
-        }
-        return list;
-    }
-
-    @Nullable
-    @Override
-    public BiomeData getData(BaseBiome biome) {
-        return new SpongeBiomeData(SpongeWorldEdit.inst().getAdapter().resolveBiome(biome.getId()));
-    }
-
-    private static class SpongeBiomeData implements BiomeData {
-        private final BiomeType biome;
-
-        /**
-         * Create a new instance.
-         *
-         * @param biome the base biome
-         */
-        private SpongeBiomeData(BiomeType biome) {
-            this.biome = biome;
-        }
-
-        @Override
-        public String getName() {
-            return biome.getName();
-        }
-    }
-
-}

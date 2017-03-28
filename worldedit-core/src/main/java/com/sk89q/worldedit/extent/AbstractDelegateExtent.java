@@ -93,7 +93,7 @@ public abstract class AbstractDelegateExtent implements Extent {
     public List<? extends Entity> getEntities(Region region) {
         return extent.getEntities(region);
     }
-
+/*
     @Override
     public BaseBiome getBiome(Vector2D position) {
         return extent.getBiome(position);
@@ -102,7 +102,7 @@ public abstract class AbstractDelegateExtent implements Extent {
     @Override
     public boolean setBiome(Vector2D position, BaseBiome biome) {
         return extent.setBiome(position, biome);
-    }
+    }*/
 
     @Override
     public Vector getMinimumPoint() {

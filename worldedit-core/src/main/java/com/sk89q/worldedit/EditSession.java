@@ -67,7 +67,7 @@ import com.sk89q.worldedit.math.transform.AffineTransform;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.patterns.SingleBlockPattern;
 import com.sk89q.worldedit.regions.*;
-import com.sk89q.worldedit.regions.shape.ArbitraryBiomeShape;
+//import com.sk89q.worldedit.regions.shape.ArbitraryBiomeShape;
 import com.sk89q.worldedit.regions.shape.ArbitraryShape;
 import com.sk89q.worldedit.regions.shape.RegionShape;
 import com.sk89q.worldedit.regions.shape.WorldEditExpressionEnvironment;
@@ -408,7 +408,7 @@ public class EditSession implements Extent {
         return changeSet.size();
     }
 
-    @Override
+    /*@Override
     public BaseBiome getBiome(Vector2D position) {
         return bypassNone.getBiome(position);
     }
@@ -416,7 +416,7 @@ public class EditSession implements Extent {
     @Override
     public boolean setBiome(Vector2D position, BaseBiome biome) {
         return bypassNone.setBiome(position, biome);
-    }
+    }*/
 
     @Override
     public BaseBlock getLazyBlock(Vector position) {
@@ -2300,7 +2300,7 @@ public class EditSession implements Extent {
         } // while
     }
 
-    public int makeBiomeShape(final Region region, final Vector zero, final Vector unit, final BaseBiome biomeType, final String expressionString, final boolean hollow) throws ExpressionException, MaxChangedBlocksException {
+   /* public int makeBiomeShape(final Region region, final Vector zero, final Vector unit, final BaseBiome biomeType, final String expressionString, final boolean hollow) throws ExpressionException, MaxChangedBlocksException {
         final Vector2D zero2D = zero.toVector2D();
         final Vector2D unit2D = unit.toVector2D();
 
@@ -2334,7 +2334,7 @@ public class EditSession implements Extent {
 
         return shape.generate(this, biomeType, hollow);
     }
-
+*/
     private static final Vector[] recurseDirections = {
             PlayerDirection.NORTH.vector(),
             PlayerDirection.EAST.vector(),

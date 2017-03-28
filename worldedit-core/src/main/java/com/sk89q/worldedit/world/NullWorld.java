@@ -71,7 +71,7 @@ public class NullWorld extends AbstractWorld {
         return false;
     }
 
-    @Override
+    /*@Override
     public BaseBiome getBiome(Vector2D position) {
         return null;
     }
@@ -79,7 +79,7 @@ public class NullWorld extends AbstractWorld {
     @Override
     public boolean setBiome(Vector2D position, BaseBiome biome) {
         return false;
-    }
+    }*/
 
     @Override
     public void dropItem(Vector position, BaseItemStack item) {

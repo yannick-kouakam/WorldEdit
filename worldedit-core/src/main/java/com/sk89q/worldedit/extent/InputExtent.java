@@ -84,6 +84,6 @@ public interface InputExtent {
      * @param position the (x, z) location to check the biome at
      * @return the biome at the location
      */
-    BaseBiome getBiome(Vector2D position);
+   // BaseBiome getBiome(Vector2D position);
 
 }
