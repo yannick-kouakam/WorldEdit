@@ -40,31 +40,5 @@ public final class Biomes {
     private Biomes() {
     }
 
-    /**
-     * Find a biome that matches the given input name.
-     *
-     * @param biomes a list of biomes
-     * @param name the name to test
-     * @param registry a biome registry
-     * @return a biome or null
-     */
-    @Nullable
-    public static BaseBiome findBiomeByName(Collection<BaseBiome> biomes, String name, BiomeRegistry registry) {
-        checkNotNull(biomes);
-        checkNotNull(name);
-        checkNotNull(registry);
-
-        Function<String, ? extends Number> compare = new LevenshteinDistance(name, false, LevenshteinDistance.STANDARD_CHARS);
-        WeightedChoice<BaseBiome> chooser = new WeightedChoice<BaseBiome>(Functions.compose(compare, new BiomeName(registry)), 0);
-        for (BaseBiome biome : biomes) {
-            chooser.consider(biome);
-        }
-        Optional<Choice<BaseBiome>> choice = chooser.getChoice();
-        if (choice.isPresent() && choice.get().getScore() <= 1) {
-            return choice.get().getValue();
-        } else {
-            return null;
-        }
-    }
 
 }

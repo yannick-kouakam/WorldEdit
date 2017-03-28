@@ -29,29 +29,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Returns the name of a biome using a given {@code BiomeRegistry}.
  */
-class BiomeName implements Function<BaseBiome, String> {
+class BiomeName  {
 
-    private final BiomeRegistry registry;
 
-    /**
-     * Create a new instance.
-     *
-     * @param registry the biome registry
-     */
-    BiomeName(BiomeRegistry registry) {
-        checkNotNull(registry);
-        this.registry = registry;
-    }
-
-    @Nullable
-    @Override
-    public String apply(BaseBiome input) {
-        BiomeData data = registry.getData(input);
-        if (data != null) {
-            return data.getName();
-        } else {
-            return null;
-        }
-    }
 
 }
