@@ -19,26 +19,11 @@
 
 package com.sk89q.worldedit.command;
 
-import com.sk89q.minecraft.util.commands.Command;
-import com.sk89q.minecraft.util.commands.CommandContext;
-import com.sk89q.minecraft.util.commands.CommandPermissions;
-import com.sk89q.minecraft.util.commands.Logging;
 import com.sk89q.worldedit.*;
-import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.math.MathUtils;
-import com.sk89q.worldedit.world.storage.LegacyChunkStore;
-import com.sk89q.worldedit.world.storage.McRegionChunkStore;
-
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.Set;
-
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.sk89q.minecraft.util.commands.Logging.LogMode.REGION;
 
 /**
- * Commands for working with chunks.
+ * Commands for working with chunks. Not used anymore
  */
 public class ChunkCommands {
 
@@ -48,6 +33,5 @@ public class ChunkCommands {
         checkNotNull(worldEdit);
         this.worldEdit = worldEdit;
     }
-
 
 }

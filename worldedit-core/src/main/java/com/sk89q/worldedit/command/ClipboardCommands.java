@@ -215,31 +215,6 @@ public class ClipboardCommands {
         player.print("The clipboard copy has been flipped.");
     }
 
-    @Command(
-        aliases = { "/load" },
-        usage = "<filename>",
-        desc = "Load a schematic into your clipboard",
-        min = 0,
-        max = 1
-    )
-    @Deprecated
-    @CommandPermissions("worldedit.clipboard.load")
-    public void load(Actor actor) {
-        actor.printError("This command is no longer used. See //schematic load.");
-    }
-
-    @Command(
-        aliases = { "/save" },
-        usage = "<filename>",
-        desc = "Save a schematic into your clipboard",
-        min = 0,
-        max = 1
-    )
-    @Deprecated
-    @CommandPermissions("worldedit.clipboard.save")
-    public void save(Actor actor) {
-        actor.printError("This command is no longer used. See //schematic save.");
-    }
 
     @Command(
         aliases = { "clearclipboard" },
