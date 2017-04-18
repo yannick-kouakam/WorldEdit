@@ -64,7 +64,6 @@ public interface FlyEditSesion
      * Fills an area recursively in the X/Z directions.
      *
      * @param origin    the location to start from
-     * @param block     the block to fill with
      * @param radius    the radius of the spherical area to fill
      * @param depth     the maximum depth, starting from the origin
      * @param recursive whether a breadth-first search should be performed
@@ -72,7 +71,7 @@ public interface FlyEditSesion
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
     @SuppressWarnings("deprecation")
-    int fillXZ(Vector origin, BaseBlock block, double radius, int depth, boolean recursive)
+    int fillXZ(Vector origin, Pattern pattern, double radius, int depth, boolean recursive)
             throws MaxChangedBlocksException;
     /**
      * Stack a cuboid region.
@@ -97,18 +96,7 @@ public interface FlyEditSesion
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
     int moveRegion(Region region, Vector dir, int distance, boolean copyAir, BaseBlock replacement) throws MaxChangedBlocksException;
-    /**
-     * Move the blocks in a region a certain direction.
-     *
-     * @param region      the region to move
-     * @param dir         the direction
-     * @param distance    the distance to move
-     * @param copyAir     true to copy air blocks
-     * @param replacement the replacement block to fill in after moving, or null to use air
-     * @return number of blocks moved
-     * @throws MaxChangedBlocksException thrown if too many blocks are changed
-     */
-     int moveCuboidRegion(Region region, Vector dir, int distance, boolean copyAir, BaseBlock replacement) throws MaxChangedBlocksException;
+
     /**
      * Drain nearby pools of water or lava.
      *

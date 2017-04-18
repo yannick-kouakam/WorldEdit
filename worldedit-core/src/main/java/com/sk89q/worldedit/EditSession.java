@@ -144,6 +144,7 @@ public class EditSession implements Extent,FlyEditSesion {
 
     @SuppressWarnings("deprecation")
     private Mask oldMask;
+    private FlyEditSesion flyEditSesion;
 
     /**
      * Create a new instance.
@@ -479,16 +480,7 @@ public class EditSession implements Extent,FlyEditSesion {
 
     @Override
     public int getHighestTerrainBlock(int x, int z, int minY, int maxY, boolean naturalOnly) {
-        for (int y = maxY; y >= minY; --y) {
-            Vector pt = new Vector(x, y, z);
-            int id = getBlockType(pt);
-            int data = getBlockData(pt);
-            if (naturalOnly ? BlockType.isNaturalTerrainBlock(id, data) : !BlockType.canPassThrough(id, data)) {
-                return y;
-            }
-        }
-
-        return minY;
+        return flyEditSesion.getHighestTerrainBlock( x, z,  minY,  maxY, naturalOnly);
     }
 
    @Override
@@ -706,56 +698,18 @@ public class EditSession implements Extent,FlyEditSesion {
         return count.getCount();
     }
 
-    @Override
+
     @SuppressWarnings("deprecation")
     public int fillXZ(Vector origin, BaseBlock block, double radius, int depth, boolean recursive)
             throws MaxChangedBlocksException {
         return fillXZ(origin, new SingleBlockPattern(block), radius, depth, recursive);
     }
 
-    /**
-     * Fills an area recursively in the X/Z directions.
-     *
-     * @param origin    the origin to start the fill from
-     * @param pattern   the pattern to fill with
-     * @param radius    the radius of the spherical area to fill, with 0 as the smallest radius
-     * @param depth     the maximum depth, starting from the origin, with 1 as the smallest depth
-     * @param recursive whether a breadth-first search should be performed
-     * @return number of blocks affected
-     * @throws MaxChangedBlocksException thrown if too many blocks are changed
-     */
     @SuppressWarnings("deprecation")
+    @Override
     public int fillXZ(Vector origin, Pattern pattern, double radius, int depth, boolean recursive) throws MaxChangedBlocksException {
-        checkNotNull(origin);
-        checkNotNull(pattern);
-        checkArgument(radius >= 0, "radius >= 0");
-        checkArgument(depth >= 1, "depth >= 1");
 
-        MaskIntersection mask = new MaskIntersection(
-                new RegionMask(new EllipsoidRegion(null, origin, new Vector(radius, radius, radius))),
-                new BoundedHeightMask(
-                        Math.max(origin.getBlockY() - depth + 1, 0),
-                        Math.min(getWorld().getMaxY(), origin.getBlockY())),
-                Masks.negate(new ExistingBlockMask(this)));
-
-        // Want to replace blocks
-        BlockReplace replace = new BlockReplace(this, Patterns.wrap(pattern));
-
-        // Pick how we're going to visit blocks
-        RecursiveVisitor visitor;
-        if (recursive) {
-            visitor = new RecursiveVisitor(mask, replace);
-        } else {
-            visitor = new DownwardVisitor(mask, replace, origin.getBlockY());
-        }
-
-        // Start at the origin
-        visitor.visit(origin);
-
-        // Execute
-        Operations.completeLegacy(visitor);
-
-        return visitor.getAffected();
+      return flyEditSesion.fillXZ(origin,pattern,radius,depth,recursive);
     }
 
     /**
@@ -1117,123 +1071,29 @@ public class EditSession implements Extent,FlyEditSesion {
 
     @Override
     public int stackCuboidRegion(Region region, Vector dir, int count, boolean copyAir) throws MaxChangedBlocksException {
-        checkNotNull(region);
-        checkNotNull(dir);
-        checkArgument(count >= 1, "count >= 1 required");
 
-        Vector size = region.getMaximumPoint().subtract(region.getMinimumPoint()).add(1, 1, 1);
-        Vector to = region.getMinimumPoint();
-        ForwardExtentCopy copy = new ForwardExtentCopy(this, region, this, to);
-        copy.setRepetitions(count);
-        copy.setTransform(new AffineTransform().translate(dir.multiply(size)));
-        if (!copyAir) {
-            copy.setSourceMask(new ExistingBlockMask(this));
-        }
-        Operations.completeLegacy(copy);
-        return copy.getAffected();
+       return flyEditSesion.stackCuboidRegion(region,dir,count,copyAir);
     }
 
     @Override
     public int moveRegion(Region region, Vector dir, int distance, boolean copyAir, BaseBlock replacement) throws MaxChangedBlocksException {
-        checkNotNull(region);
-        checkNotNull(dir);
-        checkArgument(distance >= 1, "distance >= 1 required");
 
-        Vector to = region.getMinimumPoint();
-
-        // Remove the original blocks
-        com.sk89q.worldedit.function.pattern.Pattern pattern = replacement != null ?
-                new BlockPattern(replacement) :
-                new BlockPattern(new BaseBlock(BlockID.AIR));
-        BlockReplace remove = new BlockReplace(this, pattern);
-
-        // Copy to a buffer so we don't destroy our original before we can copy all the blocks from it
-        ForgetfulExtentBuffer buffer = new ForgetfulExtentBuffer(this, new RegionMask(region));
-        ForwardExtentCopy copy = new ForwardExtentCopy(this, region, buffer, to);
-        copy.setTransform(new AffineTransform().translate(dir.multiply(distance)));
-        copy.setSourceFunction(remove); // Remove
-        copy.setRemovingEntities(true);
-        if (!copyAir) {
-            copy.setSourceMask(new ExistingBlockMask(this));
-        }
-
-        // Then we need to copy the buffer to the world
-        BlockReplace replace = new BlockReplace(this, buffer);
-        RegionVisitor visitor = new RegionVisitor(buffer.asRegion(), replace);
-
-        OperationQueue operation = new OperationQueue(copy, visitor);
-        Operations.completeLegacy(operation);
-
-        return copy.getAffected();
+        return flyEditSesion.moveRegion(region,dir,distance,copyAir,replacement);
     }
 
-    @Override
     public int moveCuboidRegion(Region region, Vector dir, int distance, boolean copyAir, BaseBlock replacement) throws MaxChangedBlocksException {
         return moveRegion(region, dir, distance, copyAir, replacement);
     }
 
   @Override
     public int drainArea(Vector origin, double radius) throws MaxChangedBlocksException {
-        checkNotNull(origin);
-        checkArgument(radius >= 0, "radius >= 0 required");
 
-        MaskIntersection mask = new MaskIntersection(
-                new BoundedHeightMask(0, getWorld().getMaxY()),
-                new RegionMask(new EllipsoidRegion(null, origin, new Vector(radius, radius, radius))),
-                getWorld().createLiquidMask());
-
-        BlockReplace replace = new BlockReplace(this, new BlockPattern(new BaseBlock(BlockID.AIR)));
-        RecursiveVisitor visitor = new RecursiveVisitor(mask, replace);
-
-        // Around the origin in a 3x3 block
-        for (BlockVector position : CuboidRegion.fromCenter(origin, 1)) {
-            if (mask.test(position)) {
-                visitor.visit(position);
-            }
-        }
-
-        Operations.completeLegacy(visitor);
-
-        return visitor.getAffected();
+        return flyEditSesion.drainArea(origin,radius);
     }
 
     @Override
     public int fixLiquid(Vector origin, double radius, int moving, int stationary) throws MaxChangedBlocksException {
-        checkNotNull(origin);
-        checkArgument(radius >= 0, "radius >= 0 required");
-
-        // Our origins can only be liquids
-        BlockMask liquidMask = new BlockMask(
-                this,
-                new BaseBlock(moving, -1),
-                new BaseBlock(stationary, -1));
-
-        // But we will also visit air blocks
-        MaskIntersection blockMask =
-                new MaskUnion(liquidMask,
-                        new BlockMask(
-                                this,
-                                new BaseBlock(BlockID.AIR)));
-
-        // There are boundaries that the routine needs to stay in
-        MaskIntersection mask = new MaskIntersection(
-                new BoundedHeightMask(0, Math.min(origin.getBlockY(), getWorld().getMaxY())),
-                new RegionMask(new EllipsoidRegion(null, origin, new Vector(radius, radius, radius))),
-                blockMask);
-
-        BlockReplace replace = new BlockReplace(this, new BlockPattern(new BaseBlock(stationary)));
-        NonRisingVisitor visitor = new NonRisingVisitor(mask, replace);
-
-        // Around the origin in a 3x3 block
-        for (BlockVector position : CuboidRegion.fromCenter(origin, 1)) {
-            if (liquidMask.test(position)) {
-                visitor.visit(position);
-            }
-        }
-
-        Operations.completeLegacy(visitor);
-
-        return visitor.getAffected();
+        return flyEditSesion.fixLiquid(origin,radius,moving,stationary);
     }
 
     /**
@@ -1253,73 +1113,7 @@ public class EditSession implements Extent,FlyEditSesion {
 
    @Override
     public int makeCylinder(Vector pos, Pattern block, double radiusX, double radiusZ, int height, boolean filled) throws MaxChangedBlocksException {
-        int affected = 0;
-
-        radiusX += 0.5;
-        radiusZ += 0.5;
-
-        if (height == 0) {
-            return 0;
-        } else if (height < 0) {
-            height = -height;
-            pos = pos.subtract(0, height, 0);
-        }
-
-        if (pos.getBlockY() < 0) {
-            pos = pos.setY(0);
-        } else if (pos.getBlockY() + height - 1 > world.getMaxY()) {
-            height = world.getMaxY() - pos.getBlockY() + 1;
-        }
-
-        final double invRadiusX = 1 / radiusX;
-        final double invRadiusZ = 1 / radiusZ;
-
-        final int ceilRadiusX = (int) Math.ceil(radiusX);
-        final int ceilRadiusZ = (int) Math.ceil(radiusZ);
-
-        double nextXn = 0;
-        forX:
-        for (int x = 0; x <= ceilRadiusX; ++x) {
-            final double xn = nextXn;
-            nextXn = (x + 1) * invRadiusX;
-            double nextZn = 0;
-            forZ:
-            for (int z = 0; z <= ceilRadiusZ; ++z) {
-                final double zn = nextZn;
-                nextZn = (z + 1) * invRadiusZ;
-
-                double distanceSq = lengthSq(xn, zn);
-                if (distanceSq > 1) {
-                    if (z == 0) {
-                        break forX;
-                    }
-                    break forZ;
-                }
-
-                if (!filled) {
-                    if (lengthSq(nextXn, zn) <= 1 && lengthSq(xn, nextZn) <= 1) {
-                        continue;
-                    }
-                }
-
-                for (int y = 0; y < height; ++y) {
-                    if (setBlock(pos.add(x, y, z), block)) {
-                        ++affected;
-                    }
-                    if (setBlock(pos.add(-x, y, z), block)) {
-                        ++affected;
-                    }
-                    if (setBlock(pos.add(x, y, -z), block)) {
-                        ++affected;
-                    }
-                    if (setBlock(pos.add(-x, y, -z), block)) {
-                        ++affected;
-                    }
-                }
-            }
-        }
-
-        return affected;
+       return flyEditSesion.makeCylinder(pos,block,radiusX,radiusZ,height,filled);
     }
 
     /**

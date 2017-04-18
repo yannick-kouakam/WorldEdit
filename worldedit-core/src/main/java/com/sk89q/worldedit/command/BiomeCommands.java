@@ -19,40 +19,7 @@
 
 package com.sk89q.worldedit.command;
 
-import com.sk89q.minecraft.util.commands.Command;
-import com.sk89q.minecraft.util.commands.CommandContext;
-import com.sk89q.minecraft.util.commands.CommandPermissions;
-import com.sk89q.minecraft.util.commands.Logging;
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.LocalSession;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.Vector2D;
-import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.WorldEditException;
-import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.function.FlatRegionFunction;
-import com.sk89q.worldedit.function.FlatRegionMaskingFilter;
-//import com.sk89q.worldedit.function.biome.BiomeReplace;
-import com.sk89q.worldedit.function.mask.Mask;
-import com.sk89q.worldedit.function.mask.Mask2D;
-import com.sk89q.worldedit.function.operation.Operations;
-import com.sk89q.worldedit.function.visitor.FlatRegionVisitor;
-import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldedit.regions.FlatRegion;
-import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.regions.Regions;
-import com.sk89q.worldedit.util.command.binding.Switch;
-import com.sk89q.worldedit.world.World;
-import com.sk89q.worldedit.world.biome.BaseBiome;
-import com.sk89q.worldedit.world.biome.BiomeData;
 
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.sk89q.minecraft.util.commands.Logging.LogMode.REGION;
 
 /**
  * Implements biome-related commands such as "/biomelist".
