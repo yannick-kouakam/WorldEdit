@@ -29,7 +29,6 @@ import com.sk89q.worldedit.extent.ChangeSetExtent;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.extent.MaskingExtent;
 import com.sk89q.worldedit.extent.NullExtent;
-import com.sk89q.worldedit.extent.buffer.ForgetfulExtentBuffer;
 import com.sk89q.worldedit.extent.cache.LastAccessExtentCache;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.extent.inventory.BlockBagExtent;
@@ -47,11 +46,13 @@ import com.sk89q.worldedit.function.block.Counter;
 import com.sk89q.worldedit.function.block.Naturalizer;
 import com.sk89q.worldedit.function.generator.GardenPatchGenerator;
 import com.sk89q.worldedit.function.mask.*;
-import com.sk89q.worldedit.function.operation.*;
-import com.sk89q.worldedit.function.pattern.BlockPattern;
+import com.sk89q.worldedit.function.operation.ChangeSetExecutor;
+import com.sk89q.worldedit.function.operation.Operation;
+import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.function.pattern.Patterns;
 import com.sk89q.worldedit.function.util.RegionOffset;
-import com.sk89q.worldedit.function.visitor.*;
+import com.sk89q.worldedit.function.visitor.LayerVisitor;
+import com.sk89q.worldedit.function.visitor.RegionVisitor;
 import com.sk89q.worldedit.history.UndoContext;
 import com.sk89q.worldedit.history.change.BlockChange;
 import com.sk89q.worldedit.history.changeset.BlockOptimizedHistory;
@@ -63,20 +64,21 @@ import com.sk89q.worldedit.math.interpolation.Interpolation;
 import com.sk89q.worldedit.math.interpolation.KochanekBartelsInterpolation;
 import com.sk89q.worldedit.math.interpolation.Node;
 import com.sk89q.worldedit.math.noise.RandomNoise;
-import com.sk89q.worldedit.math.transform.AffineTransform;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.patterns.SingleBlockPattern;
-import com.sk89q.worldedit.regions.*;
-//import com.sk89q.worldedit.regions.shape.ArbitraryBiomeShape;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.regions.FlatRegion;
+import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.regions.Regions;
 import com.sk89q.worldedit.regions.shape.ArbitraryShape;
 import com.sk89q.worldedit.regions.shape.RegionShape;
 import com.sk89q.worldedit.regions.shape.WorldEditExpressionEnvironment;
-import com.sk89q.worldedit.util.*;
+import com.sk89q.worldedit.util.Countable;
+import com.sk89q.worldedit.util.TreeGenerator;
 import com.sk89q.worldedit.util.collection.DoubleArrayList;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.NullWorld;
 import com.sk89q.worldedit.world.World;
-import com.sk89q.worldedit.world.biome.BaseBiome;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -87,6 +89,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.sk89q.worldedit.regions.Regions.*;
 
+//import com.sk89q.worldedit.regions.shape.ArbitraryBiomeShape;
+
 /**
  * An {@link Extent} that handles history, {@link BlockBag}s, change limits,
  * block re-ordering, and much more. Most operations in WorldEdit use this class.
@@ -96,7 +100,7 @@ import static com.sk89q.worldedit.regions.Regions.*;
  * using the {@link ChangeSetExtent}.</p>
  */
 @SuppressWarnings({"FieldCanBeLocal", "deprecation"})
-public class EditSession implements Extent,FlyEditSesion {
+public class EditSession implements Extent, FlyEditSesion {
 
     private static final Logger log = Logger.getLogger(EditSession.class.getCanonicalName());
 
@@ -109,6 +113,8 @@ public class EditSession implements Extent,FlyEditSesion {
         BEFORE_REORDER,
         BEFORE_CHANGE
     }
+
+    EditSesionFlyweight service;
 
     @SuppressWarnings("ProtectedField")
     protected final World world;
@@ -2170,9 +2176,6 @@ public class EditSession implements Extent,FlyEditSesion {
 
             }
         }
-
-
-
         coordinates = position;
         return affected;
     }
