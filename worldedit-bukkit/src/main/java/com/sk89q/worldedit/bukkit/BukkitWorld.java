@@ -428,29 +428,6 @@ public class BukkitWorld extends LocalWorld {
         return new LazyBlock(bukkitBlock.getTypeId(), bukkitBlock.getData(), this, position);
     }
 
-    @Override
-    public BaseBiome getBiome(Vector2D position) {
-        BukkitImplAdapter adapter = WorldEditPlugin.getInstance().getBukkitImplAdapter();
-        if (adapter != null) {
-            int id = adapter.getBiomeId(getWorld().getBiome(position.getBlockX(), position.getBlockZ()));
-            return new BaseBiome(id);
-        } else {
-            return new BaseBiome(0);
-        }
-    }
-
-    @Override
-    public boolean setBiome(Vector2D position, BaseBiome biome) {
-        BukkitImplAdapter adapter = WorldEditPlugin.getInstance().getBukkitImplAdapter();
-        if (adapter != null) {
-            Biome bukkitBiome = adapter.getBiome(biome.getId());
-            getWorld().setBiome(position.getBlockX(), position.getBlockZ(), bukkitBiome);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     /**
      * @deprecated Use {@link #setBlock(Vector, BaseBlock, boolean)}
      */

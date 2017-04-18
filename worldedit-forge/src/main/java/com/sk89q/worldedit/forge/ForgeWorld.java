@@ -216,26 +216,6 @@ public class ForgeWorld extends AbstractWorld {
     }
 
     @Override
-    public BaseBiome getBiome(Vector2D position) {
-        checkNotNull(position);
-        return new BaseBiome(Biome.getIdForBiome(getWorld().getBiomeForCoordsBody(new BlockPos(position.getBlockX(), 0, position.getBlockZ()))));
-    }
-
-    @Override
-    public boolean setBiome(Vector2D position, BaseBiome biome) {
-        checkNotNull(position);
-        checkNotNull(biome);
-
-        Chunk chunk = getWorld().getChunkFromBlockCoords(new BlockPos(position.getBlockX(), 0, position.getBlockZ()));
-        if ((chunk != null) && (chunk.isLoaded())) {
-            chunk.getBiomeArray()[((position.getBlockZ() & 0xF) << 4 | position.getBlockX() & 0xF)] = (byte) biome.getId();
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
     public boolean useItem(Vector position, BaseItem item, Direction face) {
         Item nativeItem = Item.getItemById(item.getType());
         ItemStack stack = new ItemStack(nativeItem, 1, item.getData());

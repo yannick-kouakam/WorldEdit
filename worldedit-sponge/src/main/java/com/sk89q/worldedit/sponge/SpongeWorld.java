@@ -166,21 +166,7 @@ public abstract class SpongeWorld extends AbstractWorld {
         return (int) Math.max(groundLuminanceProperty.get().getValue(), skyLuminanceProperty.get().getValue());
 
     }
-
-    @Override
-    public BaseBiome getBiome(Vector2D position) {
-        checkNotNull(position);
-        return new BaseBiome(SpongeWorldEdit.inst().getAdapter().resolve(getWorld().getBiome(position.getBlockX(), 0, position.getBlockZ())));
-    }
-
-    @Override
-    public boolean setBiome(Vector2D position, BaseBiome biome) {
-        checkNotNull(position);
-        checkNotNull(biome);
-
-        getWorld().setBiome(position.getBlockX(), 0, position.getBlockZ(), SpongeWorldEdit.inst().getAdapter().resolveBiome(biome.getId()));
-        return true;
-    }
+    
 
     @Override
     public void dropItem(Vector position, BaseItemStack item) {
