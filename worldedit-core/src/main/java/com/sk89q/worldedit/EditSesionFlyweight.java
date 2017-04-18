@@ -3,9 +3,7 @@ package com.sk89q.worldedit;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.blocks.BlockType;
-import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.extent.buffer.ForgetfulExtentBuffer;
-import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.function.block.BlockReplace;
 import com.sk89q.worldedit.function.mask.*;
 import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
@@ -24,10 +22,7 @@ import com.sk89q.worldedit.regions.EllipsoidRegion;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Countable;
 import com.sk89q.worldedit.util.TreeGenerator;
-import com.sk89q.worldedit.util.eventbus.EventBus;
-import com.sk89q.worldedit.world.World;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
@@ -41,6 +36,12 @@ public class EditSesionFlyweight implements FlyEditSesion
 {
    // protected final World world;
     EditSession editSession;//=new EditSession(new EventBus(),world,);
+
+    public Vector coordinates = null;
+
+
+
+
     @Override
     public int getHighestTerrainBlock(int x, int z, int minY, int maxY, boolean naturalOnly)
     {
@@ -347,5 +348,176 @@ public class EditSesionFlyweight implements FlyEditSesion
     public List<Countable<Integer>> getBlockDistribution(Region region)
     {
         return null;
+    }
+
+
+
+    public int makeHouseRoof(Vector position, Pattern block, int length, int width) throws MaxChangedBlocksException {
+        int affected = 0;
+
+        length--;
+        length /= 2;
+        width--;
+        width /= 2;
+        /*
+        Go down until the ground. It is needed because houses should,t fly in the air.
+        Originally, worldedit provides generating structures
+        around a player, often they appear to be flying in the air.
+        */
+        int nowY = position.getBlockY();
+        while(editSession.getWorld().getBlock(position).getId() == 0){
+            nowY--;
+            position = new Vector(position.getBlockX(), nowY, position.getZ());
+        }
+        int y = 5;
+        //Roof form
+        for (int x = length+1; x >=0 ; x--){
+            for (int z = width; z >=0 ; z--){
+                affected += generateFourDims(position, block, x, y, z);
+            }
+            //Fulfill roof
+            for(int i = 0; i < x; i++){
+                affected += generateFourDims(position, block, i, y, width);
+                affected += generateFourDims(position, block, i, y, width+1);
+            }
+            y++;
+        }
+        //ceiling
+        for (int x = 0; x <= length; x++) {
+            for (int z = 0; z <= width; z++) {
+                if ((z <= width && x <= length) || z == width || x == length) {
+                    affected += generateFourDims(position, block, x, 6, z);
+                }
+
+            }
+        }
+        coordinates = position;
+        return affected;
+    }
+
+    public int makeHouseWalls(Vector position, Pattern block, int length, int width) throws MaxChangedBlocksException {
+        int affected = 0;
+
+        length--;
+        length /= 2;
+        width--;
+        width /= 2;
+        /*
+        Go down until the ground. It is needed because houses should,t fly in the air.
+        Originally, worldedit provides generating structures
+        around a player, often they appear to be flying in the air.
+        */
+        int nowY = position.getBlockY();
+        while(world.getBlock(position).getId() == 0){
+            nowY--;
+            position = new Vector(position.getBlockX(), nowY, position.getZ());
+        }
+        for (int i = 1; i < 6; i++) {
+            for (int j = 0; j < length; j++) {
+                affected += generateFourDims(position, block, j, i, width);
+            }
+            for (int j = 0; j < width; j++ ){
+                affected += generateFourDims(position, block, length, i, j);
+            }
+
+        }
+        //Create three windows
+        if (setBlock(position.add(length, 2, 0), new BaseBlock(20))) {
+            ++affected;
+        }
+        if (setBlock(position.add(-length, 2, 0), new BaseBlock(20))) {
+            ++affected;
+        }
+        if (editSession.setBlock(position.add(0, 2, -width), new BaseBlock(20))) {
+            ++affected;
+        }
+        //create door. id: 0 is an empty space
+        if (setBlock(position.add(0, 2, width), new BaseBlock(0))) {
+            ++affected;
+        }
+        if (setBlock(position.add(0, 1, width), new BaseBlock(0))) {
+            ++affected;
+        }
+        if (setBlock(position.add(0, 1, width), new BaseBlock(64))) {
+            ++affected;
+        }
+
+        coordinates = position;
+        return affected;
+    }
+
+    public int makeHouseCarcass(Vector position, Pattern block, int length, int width) throws MaxChangedBlocksException {
+        int affected = 0;
+
+        length--;
+        length /= 2;
+        width--;
+        width /= 2;
+        /*
+        Go down until the ground. It is needed because houses should,t fly in the air.
+        Originally, worldedit provides generating structures
+        around a player, often they appear to be flying in the air.
+        */
+        int nowY = position.getBlockY();
+        while(world.getBlock(position).getId() == 0){
+            nowY--;
+            position = new Vector(position.getBlockX(), nowY, position.getZ());
+        }
+        //Four columns in the corners
+        for (int i = 1; i < 6; i++) {
+            affected += generateFourDims(position, block, length, i, width);
+        }
+
+        coordinates = position;
+
+        return affected;
+    }
+
+    //This command generates four blocks in one plane around the center
+    private int generateFourDims(Vector position, Pattern block, int length, int height, int width) throws MaxChangedBlocksException {
+        int affected = 0;
+        if (setBlock(position.add(length, height, width), block)) {
+            ++affected;
+        }
+        if (setBlock(position.add(length, height, -width), block)) {
+            ++affected;
+        }
+        if (setBlock(position.add(-length, height, width), block)) {
+            ++affected;
+        }
+        if (setBlock(position.add(-length, height, -width), block)) {
+            ++affected;
+        }
+        return affected;
+    }
+
+    public int makeHouseFloor(Vector position, Pattern block, int length, int width) throws MaxChangedBlocksException {
+        int affected = 0;
+        length--;
+        length /= 2;
+        width--;
+        width /= 2;
+        /*
+        Go down until the ground. It is needed because houses should,t fly in the air.
+        Originally, worldedit provides generating structures
+        around a player, often they appear to be flying in the air.
+        */
+        int nowY = position.getBlockY();
+        while(world.getBlock(position).getId() == 0){
+            nowY--;
+            position = new Vector(position.getBlockX(), nowY, position.getZ());
+        }
+        //Creation of the floor
+        for (int x = 0; x <= length; x++) {
+            for (int z = 0; z <= width; z++) {
+                if ((z <= width && x <= length) || z == width || x == length) {
+                    affected += generateFourDims(position, block, x, 0, z);
+                }
+
+            }
+        }
+        //Coordinates will be passed to GenerationCommands class.
+        coordinates = position;
+        return affected;
     }
 }

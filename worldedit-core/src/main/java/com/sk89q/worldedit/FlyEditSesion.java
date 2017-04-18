@@ -203,4 +203,36 @@ public interface FlyEditSesion
      * @return the results
      */
      List<Countable<Integer>> getBlockDistribution(Region region);
+
+
+
+     //Our Feature 1 functions
+    /**
+     * Makes a house floor.
+     *
+     * @param position a position
+     * @param block    a block
+     * @param length   length of house floor
+     * @param width    width of a house floor
+     *
+     * @return number of blocks changed
+     * @throws MaxChangedBlocksException thrown if too many blocks are changed
+     */
+    int makeHouseFloor(Vector position, Pattern block, int length, int width) throws MaxChangedBlocksException;
+
+    int makeHouseRoof(Vector position, Pattern block, int length, int width) throws MaxChangedBlocksException;
+
+    int makeHouseWalls(Vector position, Pattern block, int length, int width) throws MaxChangedBlocksException;
+
+    /**
+     * Makes a house carcass.
+     *
+     * @param position a position
+     * @param block    a block
+     * @param length     size of carcass
+     * @param width     size of carcass
+     * @return number of blocks changed
+     * @throws MaxChangedBlocksException thrown if too many blocks are changed
+     */
+    int makeHouseCarcass(Vector position, Pattern block, int length, int width) throws MaxChangedBlocksException;
 }

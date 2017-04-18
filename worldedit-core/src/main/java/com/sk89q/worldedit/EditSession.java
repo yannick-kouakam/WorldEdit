@@ -114,8 +114,6 @@ public class EditSession implements Extent, FlyEditSesion {
         BEFORE_CHANGE
     }
 
-    EditSesionFlyweight service;
-
     @SuppressWarnings("ProtectedField")
     protected final World world;
     private final ChangeSet changeSet = new BlockOptimizedHistory();
@@ -714,7 +712,6 @@ public class EditSession implements Extent, FlyEditSesion {
     @SuppressWarnings("deprecation")
     @Override
     public int fillXZ(Vector origin, Pattern pattern, double radius, int depth, boolean recursive) throws MaxChangedBlocksException {
-
       return flyEditSesion.fillXZ(origin,pattern,radius,depth,recursive);
     }
 
@@ -1952,41 +1949,7 @@ public class EditSession implements Extent, FlyEditSesion {
         } // while
     }
 
-   /* public int makeBiomeShape(final Region region, final Vector zero, final Vector unit, final BaseBiome biomeType, final String expressionString, final boolean hollow) throws ExpressionException, MaxChangedBlocksException {
-        final Vector2D zero2D = zero.toVector2D();
-        final Vector2D unit2D = unit.toVector2D();
 
-        final Expression expression = Expression.compile(expressionString, "x", "z");
-        expression.optimize();
-
-        final EditSession editSession = this;
-        final WorldEditExpressionEnvironment environment = new WorldEditExpressionEnvironment(editSession, unit, zero);
-        expression.setEnvironment(environment);
-
-        final ArbitraryBiomeShape shape = new ArbitraryBiomeShape(region) {
-            @Override
-            protected BaseBiome getBiome(int x, int z, BaseBiome defaultBiomeType) {
-                final Vector2D current = new Vector2D(x, z);
-                environment.setCurrentBlock(current.toVector(0));
-                final Vector2D scaled = current.subtract(zero2D).divide(unit2D);
-
-                try {
-                    if (expression.evaluate(scaled.getX(), scaled.getZ()) <= 0) {
-                        return null; // TODO should return OUTSIDE? seems to cause issues otherwise, workedaround for now
-                    }
-
-                    // TODO: Allow biome setting via a script variable (needs BiomeType<->int mapping)
-                    return defaultBiomeType;
-                } catch (Exception e) {
-                    log.log(Level.WARNING, "Failed to create shape", e);
-                    return null;
-                }
-            }
-        };
-
-        return shape.generate(this, biomeType, hollow);
-    }
-*/
     private static final Vector[] recurseDirections = {
             PlayerDirection.NORTH.vector(),
             PlayerDirection.EAST.vector(),
@@ -2004,198 +1967,26 @@ public class EditSession implements Extent, FlyEditSesion {
         return (x * x) + (z * z);
     }
 
+
+
     //Our contribution for Software Architecture project
-    public Vector coordinates = null;
 
-    /**
-     * Makes a house floor.
-     *
-     * @param position a position
-     * @param block    a block
-     * @param length   length of house floor
-     * @param width    width of a house floor
-     *
-     * @return number of blocks changed
-     * @throws MaxChangedBlocksException thrown if too many blocks are changed
-     */
     public int makeHouseFloor(Vector position, Pattern block, int length, int width) throws MaxChangedBlocksException {
-        int affected = 0;
-        length--;
-        length /= 2;
-        width--;
-        width /= 2;
-        /*
-        Go down until the ground. It is needed because houses should,t fly in the air.
-        Originally, worldedit provides generating structures
-        around a player, often they appear to be flying in the air.
-        */
-        int nowY = position.getBlockY();
-        while(world.getBlock(position).getId() == 0){
-            nowY--;
-            position = new Vector(position.getBlockX(), nowY, position.getZ());
-        }
-        //Creation of the floor
-        for (int x = 0; x <= length; x++) {
-            for (int z = 0; z <= width; z++) {
-                if ((z <= width && x <= length) || z == width || x == length) {
-                    affected += generateFourDims(position, block, x, 0, z);
-                }
-
-            }
-        }
-        //Coordinates will be passed to GenerationCommands class.
-        coordinates = position;
-        return affected;
+        return flyEditSesion.makeHouseFloor(position, block, length, width);
     }
 
-    /**
-     * Makes a house carcass.
-     *
-     * @param position a position
-     * @param block    a block
-     * @param length     size of carcass
-     * @param width     size of carcass
-     * @return number of blocks changed
-     * @throws MaxChangedBlocksException thrown if too many blocks are changed
-     */
-
     public int makeHouseCarcass(Vector position, Pattern block, int length, int width) throws MaxChangedBlocksException {
-        int affected = 0;
-
-        length--;
-        length /= 2;
-        width--;
-        width /= 2;
-        /*
-        Go down until the ground. It is needed because houses should,t fly in the air.
-        Originally, worldedit provides generating structures
-        around a player, often they appear to be flying in the air.
-        */
-        int nowY = position.getBlockY();
-        while(world.getBlock(position).getId() == 0){
-            nowY--;
-            position = new Vector(position.getBlockX(), nowY, position.getZ());
-        }
-        //Four columns in the corners
-        for (int i = 1; i < 6; i++) {
-            affected += generateFourDims(position, block, length, i, width);
-        }
-
-        coordinates = position;
-
-        return affected;
+        return flyEditSesion.makeHouseCarcass(position, block, length, width);
     }
 
     public int makeHouseWalls(Vector position, Pattern block, int length, int width) throws MaxChangedBlocksException {
-        int affected = 0;
-
-        length--;
-        length /= 2;
-        width--;
-        width /= 2;
-        /*
-        Go down until the ground. It is needed because houses should,t fly in the air.
-        Originally, worldedit provides generating structures
-        around a player, often they appear to be flying in the air.
-        */
-        int nowY = position.getBlockY();
-        while(world.getBlock(position).getId() == 0){
-            nowY--;
-            position = new Vector(position.getBlockX(), nowY, position.getZ());
-        }
-        for (int i = 1; i < 6; i++) {
-            for (int j = 0; j < length; j++) {
-                affected += generateFourDims(position, block, j, i, width);
-            }
-            for (int j = 0; j < width; j++ ){
-                affected += generateFourDims(position, block, length, i, j);
-            }
-
-        }
-        //Create three windows
-        if (setBlock(position.add(length, 2, 0), new BaseBlock(20))) {
-            ++affected;
-        }
-        if (setBlock(position.add(-length, 2, 0), new BaseBlock(20))) {
-            ++affected;
-        }
-        if (setBlock(position.add(0, 2, -width), new BaseBlock(20))) {
-            ++affected;
-        }
-        //create door. id: 0 is an empty space
-        if (setBlock(position.add(0, 2, width), new BaseBlock(0))) {
-            ++affected;
-        }
-        if (setBlock(position.add(0, 1, width), new BaseBlock(0))) {
-            ++affected;
-        }
-        if (setBlock(position.add(0, 1, width), new BaseBlock(64))) {
-            ++affected;
-        }
-
-        coordinates = position;
-        return affected;
+        return flyEditSesion.makeHouseWalls(position, block, length, width);
     }
 
     public int makeHouseRoof(Vector position, Pattern block, int length, int width) throws MaxChangedBlocksException {
-        int affected = 0;
-
-        length--;
-        length /= 2;
-        width--;
-        width /= 2;
-        /*
-        Go down until the ground. It is needed because houses should,t fly in the air.
-        Originally, worldedit provides generating structures
-        around a player, often they appear to be flying in the air.
-        */
-        int nowY = position.getBlockY();
-        while(world.getBlock(position).getId() == 0){
-            nowY--;
-            position = new Vector(position.getBlockX(), nowY, position.getZ());
-        }
-        int y = 5;
-        //Roof form
-        for (int x = length+1; x >=0 ; x--){
-            for (int z = width; z >=0 ; z--){
-                affected += generateFourDims(position, block, x, y, z);
-            }
-            //Fulfill roof
-            for(int i = 0; i < x; i++){
-                affected += generateFourDims(position, block, i, y, width);
-                affected += generateFourDims(position, block, i, y, width+1);
-            }
-            y++;
-        }
-        //ceiling
-        for (int x = 0; x <= length; x++) {
-            for (int z = 0; z <= width; z++) {
-                if ((z <= width && x <= length) || z == width || x == length) {
-                    affected += generateFourDims(position, block, x, 6, z);
-                }
-
-            }
-        }
-        coordinates = position;
-        return affected;
+        return flyEditSesion.makeHouseRoof(position, block, length, width);
     }
 
-    //This command generates four blocks in one plane around the center
-    private int generateFourDims(Vector position, Pattern block, int length, int height, int width) throws MaxChangedBlocksException {
-        int affected = 0;
-        if (setBlock(position.add(length, height, width), block)) {
-            ++affected;
-        }
-        if (setBlock(position.add(length, height, -width), block)) {
-            ++affected;
-        }
-        if (setBlock(position.add(-length, height, width), block)) {
-            ++affected;
-        }
-        if (setBlock(position.add(-length, height, -width), block)) {
-            ++affected;
-        }
-        return affected;
-    }
+
 
 }
