@@ -166,7 +166,7 @@ public abstract class SpongeWorld extends AbstractWorld {
         return (int) Math.max(groundLuminanceProperty.get().getValue(), skyLuminanceProperty.get().getValue());
 
     }
-    
+
 
     @Override
     public void dropItem(Vector position, BaseItemStack item) {
