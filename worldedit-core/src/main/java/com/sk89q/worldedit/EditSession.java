@@ -555,7 +555,7 @@ public class EditSession implements Extent, FlyEditSesion {
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
     @SuppressWarnings("deprecation")
-    private int setBlocks(Set<Vector> vset, Pattern pattern) throws MaxChangedBlocksException {
+    public int setBlocks(Set<Vector> vset, Pattern pattern) throws MaxChangedBlocksException {
         int affected = 0;
         for (Vector v : vset) {
             affected += setBlock(v, pattern) ? 1 : 0;

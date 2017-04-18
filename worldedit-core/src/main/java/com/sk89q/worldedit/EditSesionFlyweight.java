@@ -442,7 +442,7 @@ public class EditSesionFlyweight implements FlyEditSesion
         if (!filled) {
             vset = getHollowed(vset);
         }
-        return setBlocks(vset, pattern);
+        return editSession.setBlocks(vset, pattern);
     }
 
     private static double hypot(double... pars) {
@@ -539,7 +539,7 @@ public class EditSesionFlyweight implements FlyEditSesion
         if (!filled) {
             vset = getHollowed(vset);
         }
-        return setBlocks(vset, pattern);
+        return editSession.setBlocks(vset, pattern);
     }
 
     /*private void recurseHollow(Region region, BlockVector origin, Set<BlockVector> outside) {
