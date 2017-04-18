@@ -904,6 +904,7 @@ public class EditSesionFlyweight implements FlyEditSesion
         radiusY += 0.5;
         radiusZ += 0.5;
 
+
         final double invRadiusX = 1 / radiusX;
         final double invRadiusY = 1 / radiusY;
         final double invRadiusZ = 1 / radiusZ;

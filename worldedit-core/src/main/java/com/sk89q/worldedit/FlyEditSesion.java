@@ -216,6 +216,7 @@ public interface FlyEditSesion
 
     int makeFaces(final Region region, Pattern pattern) throws MaxChangedBlocksException;
 
+
     int makeCuboidWalls(Region region, Pattern pattern) throws MaxChangedBlocksException;
 
     int makeWalls(final Region region, Pattern pattern) throws MaxChangedBlocksException;
