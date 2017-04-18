@@ -20,8 +20,6 @@
 package com.sk89q.worldedit;
 
 import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.blocks.BlockID;
-import com.sk89q.worldedit.blocks.BlockType;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.event.extent.EditSessionEvent;
@@ -39,57 +37,44 @@ import com.sk89q.worldedit.extent.world.BlockQuirkExtent;
 import com.sk89q.worldedit.extent.world.ChunkLoadingExtent;
 import com.sk89q.worldedit.extent.world.FastModeExtent;
 import com.sk89q.worldedit.extent.world.SurvivalModeExtent;
-import com.sk89q.worldedit.function.GroundFunction;
 import com.sk89q.worldedit.function.RegionMaskingFilter;
 import com.sk89q.worldedit.function.block.BlockReplace;
 import com.sk89q.worldedit.function.block.Counter;
-import com.sk89q.worldedit.function.block.Naturalizer;
-import com.sk89q.worldedit.function.generator.GardenPatchGenerator;
-import com.sk89q.worldedit.function.mask.*;
+import com.sk89q.worldedit.function.mask.ExistingBlockMask;
+import com.sk89q.worldedit.function.mask.FuzzyBlockMask;
+import com.sk89q.worldedit.function.mask.Mask;
+import com.sk89q.worldedit.function.mask.Masks;
 import com.sk89q.worldedit.function.operation.ChangeSetExecutor;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.function.pattern.Patterns;
-import com.sk89q.worldedit.function.util.RegionOffset;
-import com.sk89q.worldedit.function.visitor.LayerVisitor;
 import com.sk89q.worldedit.function.visitor.RegionVisitor;
 import com.sk89q.worldedit.history.UndoContext;
 import com.sk89q.worldedit.history.change.BlockChange;
 import com.sk89q.worldedit.history.changeset.BlockOptimizedHistory;
 import com.sk89q.worldedit.history.changeset.ChangeSet;
-import com.sk89q.worldedit.internal.expression.Expression;
 import com.sk89q.worldedit.internal.expression.ExpressionException;
-import com.sk89q.worldedit.internal.expression.runtime.RValue;
-import com.sk89q.worldedit.math.interpolation.Interpolation;
-import com.sk89q.worldedit.math.interpolation.KochanekBartelsInterpolation;
-import com.sk89q.worldedit.math.interpolation.Node;
-import com.sk89q.worldedit.math.noise.RandomNoise;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.patterns.SingleBlockPattern;
 import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldedit.regions.FlatRegion;
 import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.regions.Regions;
-import com.sk89q.worldedit.regions.shape.ArbitraryShape;
-import com.sk89q.worldedit.regions.shape.RegionShape;
-import com.sk89q.worldedit.regions.shape.WorldEditExpressionEnvironment;
 import com.sk89q.worldedit.util.Countable;
 import com.sk89q.worldedit.util.TreeGenerator;
-import com.sk89q.worldedit.util.collection.DoubleArrayList;
 import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.NullWorld;
 import com.sk89q.worldedit.world.World;
 
 import javax.annotation.Nullable;
-import java.util.*;
-import java.util.logging.Level;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.sk89q.worldedit.regions.Regions.*;
 
-//import com.sk89q.worldedit.regions.shape.ArbitraryBiomeShape;
+
 
 /**
  * An {@link Extent} that handles history, {@link BlockBag}s, change limits,
@@ -102,7 +87,7 @@ import static com.sk89q.worldedit.regions.Regions.*;
 @SuppressWarnings({"FieldCanBeLocal", "deprecation"})
 public class EditSession implements Extent, FlyEditSesion {
 
-    private static final Logger log = Logger.getLogger(EditSession.class.getCanonicalName());
+    protected static final Logger log = Logger.getLogger(EditSession.class.getCanonicalName());
 
     /**
      * Used by {@link #setBlock(Vector, BaseBlock, Stage)} to
@@ -193,7 +178,7 @@ public class EditSession implements Extent, FlyEditSesion {
         checkNotNull(event);
 
         this.world = world;
-
+        flyEditSesion = new EditSesionFlyweight(world);
         if (world != null) {
             Extent extent;
 
@@ -729,16 +714,7 @@ public class EditSession implements Extent, FlyEditSesion {
      */
     @SuppressWarnings("deprecation")
     public int removeAbove(Vector position, int apothem, int height) throws MaxChangedBlocksException {
-        checkNotNull(position);
-        checkArgument(apothem >= 1, "apothem >= 1");
-        checkArgument(height >= 1, "height >= 1");
-
-        Region region = new CuboidRegion(
-                getWorld(), // Causes clamping of Y range
-                position.add(-apothem + 1, 0, -apothem + 1),
-                position.add(apothem - 1, height - 1, apothem - 1));
-        Pattern pattern = new SingleBlockPattern(new BaseBlock(BlockID.AIR));
-        return setBlocks(region, pattern);
+        return flyEditSesion.removeAbove(position, apothem, height);
     }
 
     /**
@@ -752,16 +728,7 @@ public class EditSession implements Extent, FlyEditSesion {
      */
     @SuppressWarnings("deprecation")
     public int removeBelow(Vector position, int apothem, int height) throws MaxChangedBlocksException {
-        checkNotNull(position);
-        checkArgument(apothem >= 1, "apothem >= 1");
-        checkArgument(height >= 1, "height >= 1");
-
-        Region region = new CuboidRegion(
-                getWorld(), // Causes clamping of Y range
-                position.add(-apothem + 1, 0, -apothem + 1),
-                position.add(apothem - 1, -height + 1, apothem - 1));
-        Pattern pattern = new SingleBlockPattern(new BaseBlock(BlockID.AIR));
-        return setBlocks(region, pattern);
+        return flyEditSesion.removeBelow(position, apothem, height);
     }
 
     /**
@@ -775,17 +742,7 @@ public class EditSession implements Extent, FlyEditSesion {
      */
     @SuppressWarnings("deprecation")
     public int removeNear(Vector position, int blockType, int apothem) throws MaxChangedBlocksException {
-        checkNotNull(position);
-        checkArgument(apothem >= 1, "apothem >= 1");
-
-        Mask mask = new FuzzyBlockMask(this, new BaseBlock(blockType, -1));
-        Vector adjustment = new Vector(1, 1, 1).multiply(apothem - 1);
-        Region region = new CuboidRegion(
-                getWorld(), // Causes clamping of Y range
-                position.add(adjustment.multiply(-1)),
-                position.add(adjustment));
-        Pattern pattern = new SingleBlockPattern(new BaseBlock(BlockID.AIR));
-        return replaceBlocks(region, mask, pattern);
+        return flyEditSesion.removeNear(position, blockType, apothem);
     }
 
     /**
@@ -920,12 +877,7 @@ public class EditSession implements Extent, FlyEditSesion {
      */
     @SuppressWarnings("deprecation")
     public int makeCuboidFaces(Region region, Pattern pattern) throws MaxChangedBlocksException {
-        checkNotNull(region);
-        checkNotNull(pattern);
-
-        CuboidRegion cuboid = CuboidRegion.makeCuboid(region);
-        Region faces = cuboid.getFaces();
-        return setBlocks(faces, pattern);
+        return flyEditSesion.makeCuboidFaces(region, pattern);
     }
 
     /**
@@ -940,14 +892,7 @@ public class EditSession implements Extent, FlyEditSesion {
      */
     @SuppressWarnings("deprecation")
     public int makeFaces(final Region region, Pattern pattern) throws MaxChangedBlocksException {
-        checkNotNull(region);
-        checkNotNull(pattern);
-
-        if (region instanceof CuboidRegion) {
-            return makeCuboidFaces(region, pattern);
-        } else {
-            return new RegionShape(region).generate(this, pattern, true);
-        }
+        return flyEditSesion.makeFaces(region, pattern);
     }
 
 
@@ -976,12 +921,7 @@ public class EditSession implements Extent, FlyEditSesion {
      */
     @SuppressWarnings("deprecation")
     public int makeCuboidWalls(Region region, Pattern pattern) throws MaxChangedBlocksException {
-        checkNotNull(region);
-        checkNotNull(pattern);
-
-        CuboidRegion cuboid = CuboidRegion.makeCuboid(region);
-        Region faces = cuboid.getWalls();
-        return setBlocks(faces, pattern);
+        return flyEditSesion.makeCuboidWalls(region, pattern);
     }
 
     /**
@@ -996,27 +936,7 @@ public class EditSession implements Extent, FlyEditSesion {
      */
     @SuppressWarnings("deprecation")
     public int makeWalls(final Region region, Pattern pattern) throws MaxChangedBlocksException {
-        checkNotNull(region);
-        checkNotNull(pattern);
-
-        if (region instanceof CuboidRegion) {
-            return makeCuboidWalls(region, pattern);
-        } else {
-            final int minY = region.getMinimumPoint().getBlockY();
-            final int maxY = region.getMaximumPoint().getBlockY();
-            final ArbitraryShape shape = new RegionShape(region) {
-                @Override
-                protected BaseBlock getMaterial(int x, int y, int z, BaseBlock defaultMaterial) {
-                    if (y > maxY || y < minY) {
-                        // Put holes into the floor and ceiling by telling ArbitraryShape that the shape goes on outside the region
-                        return defaultMaterial;
-                    }
-
-                    return super.getMaterial(x, y, z, defaultMaterial);
-                }
-            };
-            return shape.generate(this, pattern, true);
-        }
+        return flyEditSesion.makeWalls(region, pattern);
     }
 
     /**
@@ -1046,15 +966,7 @@ public class EditSession implements Extent, FlyEditSesion {
      */
     @SuppressWarnings("deprecation")
     public int overlayCuboidBlocks(Region region, Pattern pattern) throws MaxChangedBlocksException {
-        checkNotNull(region);
-        checkNotNull(pattern);
-
-        BlockReplace replace = new BlockReplace(this, Patterns.wrap(pattern));
-        RegionOffset offset = new RegionOffset(new Vector(0, 1, 0), replace);
-        GroundFunction ground = new GroundFunction(new ExistingBlockMask(this), offset);
-        LayerVisitor visitor = new LayerVisitor(asFlatRegion(region), minimumBlockY(region), maximumBlockY(region), ground);
-        Operations.completeLegacy(visitor);
-        return ground.getAffected();
+        return flyEditSesion.overlayCuboidBlocks(region, pattern);
     }
 
     /**
@@ -1066,34 +978,25 @@ public class EditSession implements Extent, FlyEditSesion {
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
     public int naturalizeCuboidBlocks(Region region) throws MaxChangedBlocksException {
-        checkNotNull(region);
-
-        Naturalizer naturalizer = new Naturalizer(this);
-        FlatRegion flatRegion = Regions.asFlatRegion(region);
-        LayerVisitor visitor = new LayerVisitor(flatRegion, minimumBlockY(region), maximumBlockY(region), naturalizer);
-        Operations.completeLegacy(visitor);
-        return naturalizer.getAffected();
+        return flyEditSesion.naturalizeCuboidBlocks(region);
     }
 
     @Override
     public int stackCuboidRegion(Region region, Vector dir, int count, boolean copyAir) throws MaxChangedBlocksException {
-
        return flyEditSesion.stackCuboidRegion(region,dir,count,copyAir);
     }
 
     @Override
     public int moveRegion(Region region, Vector dir, int distance, boolean copyAir, BaseBlock replacement) throws MaxChangedBlocksException {
-
         return flyEditSesion.moveRegion(region,dir,distance,copyAir,replacement);
     }
 
     public int moveCuboidRegion(Region region, Vector dir, int distance, boolean copyAir, BaseBlock replacement) throws MaxChangedBlocksException {
-        return moveRegion(region, dir, distance, copyAir, replacement);
+        return flyEditSesion.moveCuboidRegion(region, dir, distance, copyAir, replacement);
     }
 
   @Override
     public int drainArea(Vector origin, double radius) throws MaxChangedBlocksException {
-
         return flyEditSesion.drainArea(origin,radius);
     }
 
@@ -1149,53 +1052,7 @@ public class EditSession implements Extent, FlyEditSesion {
     @Override
     public int thaw(Vector position, double radius)
             throws MaxChangedBlocksException {
-        int affected = 0;
-        double radiusSq = radius * radius;
-
-        int ox = position.getBlockX();
-        int oy = position.getBlockY();
-        int oz = position.getBlockZ();
-
-        BaseBlock air = new BaseBlock(0);
-        BaseBlock water = new BaseBlock(BlockID.STATIONARY_WATER);
-
-        int ceilRadius = (int) Math.ceil(radius);
-        for (int x = ox - ceilRadius; x <= ox + ceilRadius; ++x) {
-            for (int z = oz - ceilRadius; z <= oz + ceilRadius; ++z) {
-                if ((new Vector(x, oy, z)).distanceSq(position) > radiusSq) {
-                    continue;
-                }
-
-                for (int y = world.getMaxY(); y >= 1; --y) {
-                    Vector pt = new Vector(x, y, z);
-                    int id = getBlockType(pt);
-
-                    switch (id) {
-                        case BlockID.ICE:
-                            if (setBlock(pt, water)) {
-                                ++affected;
-                            }
-                            break;
-
-                        case BlockID.SNOW:
-                            if (setBlock(pt, air)) {
-                                ++affected;
-                            }
-                            break;
-
-                        case BlockID.AIR:
-                            continue;
-
-                        default:
-                            break;
-                    }
-
-                    break;
-                }
-            }
-        }
-
-        return affected;
+        return flyEditSesion.thaw(position, radius);
     }
 
     /**
@@ -1207,59 +1064,7 @@ public class EditSession implements Extent, FlyEditSesion {
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
     public int simulateSnow(Vector position, double radius) throws MaxChangedBlocksException {
-        int affected = 0;
-        double radiusSq = radius * radius;
-
-        int ox = position.getBlockX();
-        int oy = position.getBlockY();
-        int oz = position.getBlockZ();
-
-        BaseBlock ice = new BaseBlock(BlockID.ICE);
-        BaseBlock snow = new BaseBlock(BlockID.SNOW);
-
-        int ceilRadius = (int) Math.ceil(radius);
-        for (int x = ox - ceilRadius; x <= ox + ceilRadius; ++x) {
-            for (int z = oz - ceilRadius; z <= oz + ceilRadius; ++z) {
-                if ((new Vector(x, oy, z)).distanceSq(position) > radiusSq) {
-                    continue;
-                }
-
-                for (int y = world.getMaxY(); y >= 1; --y) {
-                    Vector pt = new Vector(x, y, z);
-                    int id = getBlockType(pt);
-
-                    if (id == BlockID.AIR) {
-                        continue;
-                    }
-
-                    // Ice!
-                    if (id == BlockID.WATER || id == BlockID.STATIONARY_WATER) {
-                        if (setBlock(pt, ice)) {
-                            ++affected;
-                        }
-                        break;
-                    }
-
-                    // Snow should not cover these blocks
-                    if (BlockType.isTranslucent(id)) {
-                        break;
-                    }
-
-                    // Too high?
-                    if (y == world.getMaxY()) {
-                        break;
-                    }
-
-                    // add snow cover
-                    if (setBlock(pt.add(0, 1, 0), snow)) {
-                        ++affected;
-                    }
-                    break;
-                }
-            }
-        }
-
-        return affected;
+        return flyEditSesion.simulateSnow(position, radius);
     }
 
     /**
@@ -1279,77 +1084,12 @@ public class EditSession implements Extent, FlyEditSesion {
     @Override
     public int green(Vector position, double radius, boolean onlyNormalDirt)
             throws MaxChangedBlocksException {
-        int affected = 0;
-        final double radiusSq = radius * radius;
-
-        final int ox = position.getBlockX();
-        final int oy = position.getBlockY();
-        final int oz = position.getBlockZ();
-
-        final BaseBlock grass = new BaseBlock(BlockID.GRASS);
-
-        final int ceilRadius = (int) Math.ceil(radius);
-        for (int x = ox - ceilRadius; x <= ox + ceilRadius; ++x) {
-            for (int z = oz - ceilRadius; z <= oz + ceilRadius; ++z) {
-                if ((new Vector(x, oy, z)).distanceSq(position) > radiusSq) {
-                    continue;
-                }
-
-                loop:
-                for (int y = world.getMaxY(); y >= 1; --y) {
-                    final Vector pt = new Vector(x, y, z);
-                    final int id = getBlockType(pt);
-                    final int data = getBlockData(pt);
-
-                    switch (id) {
-                        case BlockID.DIRT:
-                            if (onlyNormalDirt && data != 0) {
-                                break loop;
-                            }
-
-                            if (setBlock(pt, grass)) {
-                                ++affected;
-                            }
-                            break loop;
-
-                        case BlockID.WATER:
-                        case BlockID.STATIONARY_WATER:
-                        case BlockID.LAVA:
-                        case BlockID.STATIONARY_LAVA:
-                            // break on liquids...
-                            break loop;
-
-                        default:
-                            // ...and all non-passable blocks
-                            if (!BlockType.canPassThrough(id, data)) {
-                                break loop;
-                            }
-                    }
-                }
-            }
-        }
-
-        return affected;
+        return flyEditSesion.green(position, radius, onlyNormalDirt);
     }
 
     @Override
     public int makePumpkinPatches(Vector position, int apothem) throws MaxChangedBlocksException {
-        // We want to generate pumpkins
-        GardenPatchGenerator generator = new GardenPatchGenerator(this);
-        generator.setPlant(GardenPatchGenerator.getPumpkinPattern());
-
-        // In a region of the given radius
-        FlatRegion region = new CuboidRegion(
-                getWorld(), // Causes clamping of Y range
-                position.add(-apothem, -5, -apothem),
-                position.add(apothem, 10, apothem));
-        double density = 0.02;
-
-        GroundFunction ground = new GroundFunction(new ExistingBlockMask(this), generator);
-        LayerVisitor visitor = new LayerVisitor(region, minimumBlockY(region), maximumBlockY(region), ground);
-        visitor.setMask(new NoiseFilter2D(new RandomNoise(), density));
-        Operations.completeLegacy(visitor);
-        return ground.getAffected();
+        return flyEditSesion.makePumpkinPatches(position, apothem);
     }
 
     /**
@@ -1363,91 +1103,12 @@ public class EditSession implements Extent, FlyEditSesion {
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
     public int makeForest(Vector basePosition, int size, double density, TreeGenerator treeGenerator) throws MaxChangedBlocksException {
-        int affected = 0;
-
-        for (int x = basePosition.getBlockX() - size; x <= basePosition.getBlockX()
-                + size; ++x) {
-            for (int z = basePosition.getBlockZ() - size; z <= basePosition.getBlockZ()
-                    + size; ++z) {
-                // Don't want to be in the ground
-                if (!getBlock(new Vector(x, basePosition.getBlockY(), z)).isAir()) {
-                    continue;
-                }
-                // The gods don't want a tree here
-                if (Math.random() >= density) {
-                    continue;
-                } // def 0.05
-
-                for (int y = basePosition.getBlockY(); y >= basePosition.getBlockY() - 10; --y) {
-                    // Check if we hit the ground
-                    int t = getBlock(new Vector(x, y, z)).getType();
-                    if (t == BlockID.GRASS || t == BlockID.DIRT) {
-                        treeGenerator.generate(this, new Vector(x, y + 1, z));
-                        ++affected;
-                        break;
-                    } else if (t == BlockID.SNOW) {
-                        setBlock(new Vector(x, y, z), new BaseBlock(BlockID.AIR));
-                    } else if (t != BlockID.AIR) { // Trees won't grow on this!
-                        break;
-                    }
-                }
-            }
-        }
-
-        return affected;
+        return flyEditSesion.makeForest(basePosition, size, density, treeGenerator);
     }
 
     @Override
     public List<Countable<Integer>> getBlockDistribution(Region region) {
-        List<Countable<Integer>> distribution = new ArrayList<Countable<Integer>>();
-        Map<Integer, Countable<Integer>> map = new HashMap<Integer, Countable<Integer>>();
-
-        if (region instanceof CuboidRegion) {
-            // Doing this for speed
-            Vector min = region.getMinimumPoint();
-            Vector max = region.getMaximumPoint();
-
-            int minX = min.getBlockX();
-            int minY = min.getBlockY();
-            int minZ = min.getBlockZ();
-            int maxX = max.getBlockX();
-            int maxY = max.getBlockY();
-            int maxZ = max.getBlockZ();
-
-            for (int x = minX; x <= maxX; ++x) {
-                for (int y = minY; y <= maxY; ++y) {
-                    for (int z = minZ; z <= maxZ; ++z) {
-                        Vector pt = new Vector(x, y, z);
-
-                        int id = getBlockType(pt);
-
-                        if (map.containsKey(id)) {
-                            map.get(id).increment();
-                        } else {
-                            Countable<Integer> c = new Countable<Integer>(id, 1);
-                            map.put(id, c);
-                            distribution.add(c);
-                        }
-                    }
-                }
-            }
-        } else {
-            for (Vector pt : region) {
-                int id = getBlockType(pt);
-
-                if (map.containsKey(id)) {
-                    map.get(id).increment();
-                } else {
-                    Countable<Integer> c = new Countable<Integer>(id, 1);
-                    map.put(id, c);
-                }
-            }
-        }
-
-        Collections.sort(distribution);
-        // Collections.reverse(distribution);
-
-        return distribution;
+       return flyEditSesion.getBlockDistribution(region);
     }
 
     /**
@@ -1458,132 +1119,17 @@ public class EditSession implements Extent, FlyEditSesion {
      */
     // TODO reduce code duplication - probably during ops-redux
     public List<Countable<BaseBlock>> getBlockDistributionWithData(Region region) {
-        List<Countable<BaseBlock>> distribution = new ArrayList<Countable<BaseBlock>>();
-        Map<BaseBlock, Countable<BaseBlock>> map = new HashMap<BaseBlock, Countable<BaseBlock>>();
-
-        if (region instanceof CuboidRegion) {
-            // Doing this for speed
-            Vector min = region.getMinimumPoint();
-            Vector max = region.getMaximumPoint();
-
-            int minX = min.getBlockX();
-            int minY = min.getBlockY();
-            int minZ = min.getBlockZ();
-            int maxX = max.getBlockX();
-            int maxY = max.getBlockY();
-            int maxZ = max.getBlockZ();
-
-            for (int x = minX; x <= maxX; ++x) {
-                for (int y = minY; y <= maxY; ++y) {
-                    for (int z = minZ; z <= maxZ; ++z) {
-                        Vector pt = new Vector(x, y, z);
-
-                        BaseBlock blk = new BaseBlock(getBlockType(pt), getBlockData(pt));
-
-                        if (map.containsKey(blk)) {
-                            map.get(blk).increment();
-                        } else {
-                            Countable<BaseBlock> c = new Countable<BaseBlock>(blk, 1);
-                            map.put(blk, c);
-                            distribution.add(c);
-                        }
-                    }
-                }
-            }
-        } else {
-            for (Vector pt : region) {
-                BaseBlock blk = new BaseBlock(getBlockType(pt), getBlockData(pt));
-
-                if (map.containsKey(blk)) {
-                    map.get(blk).increment();
-                } else {
-                    Countable<BaseBlock> c = new Countable<BaseBlock>(blk, 1);
-                    map.put(blk, c);
-                }
-            }
-        }
-
-        Collections.sort(distribution);
-        // Collections.reverse(distribution);
-
-        return distribution;
+        return flyEditSesion.getBlockDistributionWithData(region);
     }
 
-    public int makeShape(final Region region, final Vector zero, final Vector unit, final Pattern pattern, final String expressionString, final boolean hollow) throws ExpressionException, MaxChangedBlocksException {
-        final Expression expression = Expression.compile(expressionString, "x", "y", "z", "type", "data");
-        expression.optimize();
-
-        final RValue typeVariable = expression.getVariable("type", false);
-        final RValue dataVariable = expression.getVariable("data", false);
-
-        final WorldEditExpressionEnvironment environment = new WorldEditExpressionEnvironment(this, unit, zero);
-        expression.setEnvironment(environment);
-
-        final ArbitraryShape shape = new ArbitraryShape(region) {
-            @Override
-            protected BaseBlock getMaterial(int x, int y, int z, BaseBlock defaultMaterial) {
-                final Vector current = new Vector(x, y, z);
-                environment.setCurrentBlock(current);
-                final Vector scaled = current.subtract(zero).divide(unit);
-
-                try {
-                    if (expression.evaluate(scaled.getX(), scaled.getY(), scaled.getZ(), defaultMaterial.getType(), defaultMaterial.getData()) <= 0) {
-                        return null;
-                    }
-
-                    return new BaseBlock((int) typeVariable.getValue(), (int) dataVariable.getValue());
-                } catch (Exception e) {
-                    log.log(Level.WARNING, "Failed to create shape", e);
-                    return null;
-                }
-            }
-        };
-
-        return shape.generate(this, pattern, hollow);
+    public int makeShape(final Region region, final Vector zero, final Vector unit, final Pattern pattern, final String expressionString, final boolean hollow)
+            throws ExpressionException, MaxChangedBlocksException {
+        return flyEditSesion.makeShape(region, zero, unit, pattern, expressionString, hollow);
     }
 
-    public int deformRegion(final Region region, final Vector zero, final Vector unit, final String expressionString) throws ExpressionException, MaxChangedBlocksException {
-        final Expression expression = Expression.compile(expressionString, "x", "y", "z");
-        expression.optimize();
-
-        final RValue x = expression.getVariable("x", false);
-        final RValue y = expression.getVariable("y", false);
-        final RValue z = expression.getVariable("z", false);
-
-        final WorldEditExpressionEnvironment environment = new WorldEditExpressionEnvironment(this, unit, zero);
-        expression.setEnvironment(environment);
-
-        final DoubleArrayList<BlockVector, BaseBlock> queue = new DoubleArrayList<BlockVector, BaseBlock>(false);
-
-        for (BlockVector position : region) {
-            // offset, scale
-            final Vector scaled = position.subtract(zero).divide(unit);
-
-            // transform
-            expression.evaluate(scaled.getX(), scaled.getY(), scaled.getZ());
-
-            final BlockVector sourcePosition = environment.toWorld(x.getValue(), y.getValue(), z.getValue());
-
-            // read block from world
-            // TODO: use getBlock here once the reflection is out of the way
-            final BaseBlock material = new BaseBlock(world.getBlockType(sourcePosition), world.getBlockData(sourcePosition));
-
-            // queue operation
-            queue.put(position, material);
-        }
-
-        int affected = 0;
-        for (Map.Entry<BlockVector, BaseBlock> entry : queue) {
-            BlockVector position = entry.getKey();
-            BaseBlock material = entry.getValue();
-
-            // set at new position
-            if (setBlock(position, material)) {
-                ++affected;
-            }
-        }
-
-        return affected;
+    public int deformRegion(final Region region, final Vector zero, final Vector unit, final String expressionString)
+            throws ExpressionException, MaxChangedBlocksException {
+        return flyEditSesion.deformRegion(region, zero, unit, expressionString);
     }
 
     /**
@@ -1608,15 +1154,18 @@ public class EditSession implements Extent, FlyEditSesion {
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
 
+    public int drawLine(Pattern pattern, Vector pos1, Vector pos2, double radius, boolean filled)
+            throws MaxChangedBlocksException {
+        return flyEditSesion.drawLine(pattern, pos1, pos2, radius, filled);
+    }
+    public int drawSpline(Pattern pattern, List<Vector> nodevectors, double tension, double bias, double continuity, double quality, double radius, boolean filled)
+            throws MaxChangedBlocksException{
+        return flyEditSesion.drawSpline(pattern, nodevectors, tension, bias, continuity, quality, radius, filled);
+    }
 
-    private static final Vector[] recurseDirections = {
-            PlayerDirection.NORTH.vector(),
-            PlayerDirection.EAST.vector(),
-            PlayerDirection.SOUTH.vector(),
-            PlayerDirection.WEST.vector(),
-            PlayerDirection.UP.vector(),
-            PlayerDirection.DOWN.vector(),
-    };
+    public int hollowOutRegion(Region region, int thickness, Pattern pattern) throws MaxChangedBlocksException {
+        return flyEditSesion.hollowOutRegion(region, thickness, pattern);
+    }
 
 
     //Our contribution for Software Architecture project
@@ -1660,25 +1209,5 @@ public class EditSession implements Extent, FlyEditSesion {
         return flyEditSesion.makeHouseRoof(position, block, length, width);
     }
 
-
-
-
-    //This command generates four blocks in one plane around the center
-    private int generateFourDims(Vector position, Pattern block, int length, int height, int width) throws MaxChangedBlocksException {
-        int affected = 0;
-        if (setBlock(position.add(length, height, width), block)) {
-            ++affected;
-        }
-        if (setBlock(position.add(length, height, -width), block)) {
-            ++affected;
-        }
-        if (setBlock(position.add(-length, height, width), block)) {
-            ++affected;
-        }
-        if (setBlock(position.add(-length, height, -width), block)) {
-            ++affected;
-        }
-        return affected;
-    }
 
 }

@@ -1,6 +1,7 @@
 package com.sk89q.worldedit;
 
 import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.internal.expression.ExpressionException;
 import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Countable;
@@ -204,6 +205,44 @@ public interface FlyEditSesion
      */
      List<Countable<Integer>> getBlockDistribution(Region region);
 
+
+    int removeAbove(Vector position, int apothem, int height) throws MaxChangedBlocksException;
+
+    int removeBelow(Vector position, int apothem, int height) throws MaxChangedBlocksException;
+
+    int removeNear(Vector position, int blockType, int apothem) throws MaxChangedBlocksException;
+
+    int makeCuboidFaces(Region region, Pattern pattern) throws MaxChangedBlocksException;
+
+    int makeFaces(final Region region, Pattern pattern) throws MaxChangedBlocksException;
+
+    int makeCuboidWalls(Region region, Pattern pattern) throws MaxChangedBlocksException;
+
+    int makeWalls(final Region region, Pattern pattern) throws MaxChangedBlocksException;
+
+    int overlayCuboidBlocks(Region region, Pattern pattern) throws MaxChangedBlocksException;
+
+    int naturalizeCuboidBlocks(Region region) throws MaxChangedBlocksException;
+
+    int moveCuboidRegion(Region region, Vector dir, int distance, boolean copyAir, BaseBlock replacement) throws MaxChangedBlocksException;
+
+    int simulateSnow(Vector position, double radius) throws MaxChangedBlocksException;
+
+    List<Countable<BaseBlock>> getBlockDistributionWithData(Region region);
+
+    int drawLine(Pattern pattern, Vector pos1, Vector pos2, double radius, boolean filled)
+            throws MaxChangedBlocksException;
+
+    int drawSpline(Pattern pattern, List<Vector> nodevectors, double tension, double bias, double continuity, double quality, double radius, boolean filled)
+            throws MaxChangedBlocksException;
+
+    int hollowOutRegion(Region region, int thickness, Pattern pattern) throws MaxChangedBlocksException;
+
+    int makeShape(final Region region, final Vector zero, final Vector unit, final Pattern pattern, final String expressionString, final boolean hollow)
+            throws ExpressionException, MaxChangedBlocksException;
+
+    int deformRegion(final Region region, final Vector zero, final Vector unit, final String expressionString)
+            throws ExpressionException, MaxChangedBlocksException;
 
 
      //Our Feature 1 functions
