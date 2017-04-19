@@ -43,6 +43,7 @@ import com.sk89q.worldedit.world.World;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -53,11 +54,11 @@ import static com.sk89q.worldedit.regions.Regions.minimumBlockY;
 /**
  * Created by kouakam on 18.04.2017.
  */
-public class EditSesionFlyweight implements FlyEditSesion
+public class EditSesionServices implements FlyEditSesion
 {
    // protected final World world;
     EditSession editSession;//=new EditSession(new EventBus(),world,);
-
+    protected static final Logger log = Logger.getLogger(EditSession.class.getCanonicalName());
     public Vector coordinates = null;
 
 
@@ -66,7 +67,7 @@ public class EditSesionFlyweight implements FlyEditSesion
     protected final World world;
     private final ChangeSet changeSet = new BlockOptimizedHistory();
 
-    public EditSesionFlyweight(World world){
+    public EditSesionServices(World world){
         this.world = world;
     }
 
@@ -74,7 +75,7 @@ public class EditSesionFlyweight implements FlyEditSesion
     private Mask oldMask;
 
 
-    public EditSesionFlyweight(EventBus eventBus, World world, int maxBlocks, @Nullable BlockBag blockBag, EditSessionEvent event){
+    public EditSesionServices(EventBus eventBus, World world, int maxBlocks, @Nullable BlockBag blockBag, EditSessionEvent event){
         this.world = world;
     }
 
@@ -1201,7 +1202,7 @@ public class EditSesionFlyweight implements FlyEditSesion
 
                     return new BaseBlock((int) typeVariable.getValue(), (int) dataVariable.getValue());
                 } catch (Exception e) {
-                    editSession.log.log(Level.WARNING, "Failed to create shape", e);
+                    log.log(Level.WARNING, "Failed to create shape", e);
                     return null;
                 }
             }
@@ -1294,6 +1295,7 @@ public class EditSesionFlyweight implements FlyEditSesion
 
             }
         }
+        editSession.coordinates = position;
         coordinates = position;
         return affected;
     }
@@ -1344,7 +1346,7 @@ public class EditSesionFlyweight implements FlyEditSesion
         if (editSession.setBlock(position.add(0, 1, width), new BaseBlock(64))) {
             ++affected;
         }
-
+        editSession.coordinates = position;
         coordinates = position;
         return affected;
     }
@@ -1370,7 +1372,7 @@ public class EditSesionFlyweight implements FlyEditSesion
         for (int i = 1; i < 6; i++) {
             affected += generateFourDims(position, block, length, i, width);
         }
-
+        editSession.coordinates = position;
         coordinates = position;
 
         return affected;
@@ -1421,6 +1423,7 @@ public class EditSesionFlyweight implements FlyEditSesion
         }
         //Coordinates will be passed to GenerationCommands class.
         coordinates = position;
+        editSession.coordinates = position;
         return affected;
     }
 }

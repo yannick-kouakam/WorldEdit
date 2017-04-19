@@ -69,7 +69,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -87,7 +86,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @SuppressWarnings({"FieldCanBeLocal", "deprecation"})
 public class EditSession implements Extent, FlyEditSesion {
 
-    protected static final Logger log = Logger.getLogger(EditSession.class.getCanonicalName());
+
 
     /**
      * Used by {@link #setBlock(Vector, BaseBlock, Stage)} to
@@ -99,7 +98,6 @@ public class EditSession implements Extent, FlyEditSesion {
         BEFORE_CHANGE
     }
 
-    EditSesionFlyweight service;
 
     @SuppressWarnings("ProtectedField")
     protected final World world;
@@ -178,7 +176,7 @@ public class EditSession implements Extent, FlyEditSesion {
         checkNotNull(event);
 
         this.world = world;
-        flyEditSesion = new EditSesionFlyweight(world);
+        flyEditSesion = new EditSesionServices(world);
         if (world != null) {
             Extent extent;
 
