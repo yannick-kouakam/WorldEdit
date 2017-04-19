@@ -53,7 +53,7 @@ import static com.sk89q.worldedit.regions.Regions.minimumBlockY;
 /**
  * Created by kouakam on 18.04.2017.
  */
-public class EditSesionFlyweight implements FlyEditSesion
+public class EditSesionServices implements FlyEditSesion
 {
    // protected final World world;
     EditSession editSession;//=new EditSession(new EventBus(),world,);
@@ -66,7 +66,7 @@ public class EditSesionFlyweight implements FlyEditSesion
     protected final World world;
     private final ChangeSet changeSet = new BlockOptimizedHistory();
 
-    public EditSesionFlyweight(World world){
+    public EditSesionServices(World world){
         this.world = world;
     }
 
@@ -74,7 +74,7 @@ public class EditSesionFlyweight implements FlyEditSesion
     private Mask oldMask;
 
 
-    public EditSesionFlyweight(EventBus eventBus, World world, int maxBlocks, @Nullable BlockBag blockBag, EditSessionEvent event){
+    public EditSesionServices(EventBus eventBus, World world, int maxBlocks, @Nullable BlockBag blockBag, EditSessionEvent event){
         this.world = world;
     }
 

@@ -99,7 +99,7 @@ public class EditSession implements Extent, FlyEditSesion {
         BEFORE_CHANGE
     }
 
-    EditSesionFlyweight service;
+    EditSesionServices service;
 
     @SuppressWarnings("ProtectedField")
     protected final World world;
@@ -178,7 +178,7 @@ public class EditSession implements Extent, FlyEditSesion {
         checkNotNull(event);
 
         this.world = world;
-        flyEditSesion = new EditSesionFlyweight(world);
+        flyEditSesion = new EditSesionServices(world);
         if (world != null) {
             Extent extent;
 
